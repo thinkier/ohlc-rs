@@ -1,0 +1,10 @@
+* text=auto eol=lf
+*.sh text
+*.bat text
+*.json text
+*.toml text
+* rs text
+
+*.png bin
+*.png binary
+*.jpg binary
