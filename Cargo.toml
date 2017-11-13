@@ -1,0 +1,6 @@
+[package]
+name = "ohlc"
+version = "0.1.0"
+authors = ["UninterestinAcc <uninterestinacc@users.noreply.github.com>"]
+
+[dependencies]
