@@ -1,6 +1,8 @@
 #[macro_use]
 extern crate serde_derive;
+extern crate image;
 extern crate tempdir;
+
 
 use tempdir::*;
 
@@ -105,8 +107,10 @@ impl OHLCRenderOptions {
 	pub fn render_and_save(&self, data: Vec<OHLC>, path: &Path) -> Result<(), String> {
 		let ohlc_of_set = calculaate_ohlc_of_set(&data);
 
-		let width = 6 * data.len() + 9; // 5 px wide, plus 1px padding on left, plus 5px padding on the left border, pls 4px (total 5) padding on the right border.
-		let height = (ohlc_of_set.range().round() as u64) + 10; // 5px top and bottom pad, then 1 pixel = 1 value
+		let margin = 10; // 10px border padding
+
+		let width = 6 * data.len() + (2 * margin - 1); // 5 px wide per candle, plus 1px padding on left, plus margin left and right
+		let height = (ohlc_of_set.range().round() as u64) + (2 * margin); // top and bottom margin, then 1 pixel = 1 value
 
 		unimplemented!()
 	}
