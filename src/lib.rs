@@ -1,5 +1,8 @@
 #[macro_use]
 extern crate serde_derive;
+extern crate tempdir;
+
+use tempdir::*;
 
 pub mod data;
 pub mod options;
@@ -7,6 +10,8 @@ pub mod options;
 pub use data::*;
 pub use options::*;
 
+use std::collections::hash_map::DefaultHasher;
+use std::hash::Hash;
 use std::path::*;
 
 /// OHLC Chart Configuration, mutate through the methods
@@ -58,17 +63,25 @@ impl OHLCRenderOptions {
 	/// Returns an error string originating from OHLC if an error occurs, and the result of the callback function otherwise.
 	pub fn render_ohlc<F>(self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
 		where F: Fn(&Path) -> Result<(), String> + Sized {
-		// Create temporary directory
+		// Create temporary directory: mostly copied example from https://github.com/rust-lang-nursery/tempdir
+		if let Ok(dir) = TempDir::new(&format!("ohlc_render_{:?}", data.hash(&mut DefaultHasher::new()))) {
+			let file_path = dir.path().join("chart.png");
 
-		// Render chart and save to temporary directory
+			//			let mut f = File::create(file_path)?;
+			//			f.write_all(b"Hello, world!")?;
+			//			f.sync_all()?;
+			//			dir.close()?;
 
-		let path = Path::new(""); // Temporary
+			// Render chart and save to temporary directory
 
-		let result = (callback)(path);
+			let result = (callback)(&file_path);
 
-		// Delete temporary directory
+			// Delete temporary directory
 
-		Ok(result)
+			Ok(result)
+		} else {
+			Err("Failed to create a temporary directory.".to_string())
+		}
 	}
 }
 

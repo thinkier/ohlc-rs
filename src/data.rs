@@ -1,9 +1,20 @@
+use std::hash::{Hash, Hasher};
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
 pub struct OHLC {
 	pub o: f64,
 	pub h: f64,
 	pub l: f64,
 	pub c: f64,
+}
+
+impl Hash for OHLC {
+	fn hash<H: Hasher>(&self, state: &mut H) {
+		state.write_u64(self.o as u64);
+		state.write_u64(self.h as u64);
+		state.write_u64(self.l as u64);
+		state.write_u64(self.c as u64);
+	}
 }
 
 impl OHLC {
