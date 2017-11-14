@@ -7,3 +7,4 @@ authors = ["UninterestinAcc <uninterestinacc@users.noreply.github.com>"]
 serde = "1.0"
 serde_derive = "1.0"
 image = "0.13"
+tempdir = "0.3"

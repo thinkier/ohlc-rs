@@ -53,9 +53,22 @@ impl OHLCRenderOptions {
 
 	/// Renders the OHLC Chart by the data, using the configs provided.
 	///
-	/// Returns the path leading to the rendered chart upon success, and an error string otherwise.
-	pub fn render_ohlc(self, data: Vec<OHLC>) -> Result<Path, String> {
-		unimplemented!()
+	/// Takes a lambda function for processing the image once it's rendered, do not do anything asynchronous with the image as it will be deleted as soon as the function finishes.
+	///
+	/// Returns an error string originating from OHLC if an error occurs, and the result of the callback function otherwise.
+	pub fn render_ohlc<F>(self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
+		where F: Fn(&Path) -> Result<(), String> + Sized {
+		// Create temporary directory
+
+		// Render chart and save to temporary directory
+
+		let path = Path::new(""); // Temporary
+
+		let result = (callback)(path);
+
+		// Delete temporary directory
+
+		Ok(result)
 	}
 }
 
