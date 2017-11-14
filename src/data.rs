@@ -26,4 +26,8 @@ impl OHLC {
 			c: 0.0,
 		}
 	}
+
+	pub fn range(&self) -> f64 {
+		(self.h - self.l).abs()
+	}
 }
