@@ -1,9 +1,9 @@
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
 pub struct OHLC {
-	o: f64,
-	h: f64,
-	l: f64,
-	c: f64,
+	pub o: f64,
+	pub h: f64,
+	pub l: f64,
+	pub c: f64,
 }
 
 impl OHLC {
