@@ -61,7 +61,7 @@ impl OHLCRenderOptions {
 	/// Takes a lambda function for processing the image once it's rendered, do not do anything asynchronous with the image as it will be deleted as soon as the function finishes.
 	///
 	/// Returns an error string originating from OHLC if an error occurs, and the result of the callback function otherwise.
-	pub fn render_ohlc<F>(self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
+	pub fn render<F>(self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
 		where F: Fn(&Path) -> Result<(), String> + Sized {
 		// Create temporary directory: mostly copied example from https://github.com/rust-lang-nursery/tempdir
 		if let Ok(dir) = TempDir::new(&format!("ohlc_render_{:?}", data.hash(&mut DefaultHasher::new()))) {
