@@ -104,8 +104,24 @@ impl OHLCRenderOptions {
 
 #[cfg(test)]
 mod tests {
+	use super::*;
+
 	#[test]
-	fn it_works() {
-		assert_eq!(2 + 2, 4);
+	fn modifiers() {
+		assert_eq!(
+			OHLCRenderOptions {
+				title: String::new(),
+				text_colour: 0,
+				value_prefix: String::new(),
+				value_suffix: String::new(),
+				time_units: 3600,
+				h_axis_options: AxisOptions::new(),
+				v_axis_options: AxisOptions::new(),
+				down_colour: 0x69696969,
+				up_colour: 0x69696969,
+			},
+			OHLCRenderOptions::new()
+				.colours(0x69696969, 0x69696969)
+		);
 	}
 }
