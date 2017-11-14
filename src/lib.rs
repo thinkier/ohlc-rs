@@ -61,27 +61,34 @@ impl OHLCRenderOptions {
 	/// Takes a lambda function for processing the image once it's rendered, do not do anything asynchronous with the image as it will be deleted as soon as the function finishes.
 	///
 	/// Returns an error string originating from OHLC if an error occurs, and the result of the callback function otherwise.
-	pub fn render<F>(self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
+	pub fn render<F>(&self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
 		where F: Fn(&Path) -> Result<(), String> + Sized {
 		// Create temporary directory: mostly copied example from https://github.com/rust-lang-nursery/tempdir
 		if let Ok(dir) = TempDir::new(&format!("ohlc_render_{:?}", data.hash(&mut DefaultHasher::new()))) {
 			let file_path = dir.path().join("chart.png");
 
-			//			let mut f = File::create(file_path)?;
-			//			f.write_all(b"Hello, world!")?;
-			//			f.sync_all()?;
-			//			dir.close()?;
+			let mut result = match self.render_and_save(data, &file_path) {
+				Ok(_) => Ok(Ok(())),
+				Err(err) => Err(err)
+			};
 
-			// Render chart and save to temporary directory
+			if result.is_ok() {
+				result = Ok((callback)(&file_path));
+			}
 
-			let result = (callback)(&file_path);
+			let _ = dir.close(); // Delete temporary directory
 
-			// Delete temporary directory
-
-			Ok(result)
+			result
 		} else {
 			Err("Failed to create a temporary directory.".to_string())
 		}
+	}
+
+	/// Renders the chart and saves it to the specified path
+	///
+	/// Returns an error string if an error occurs
+	pub fn render_and_save(&self, data: Vec<OHLC>, path: &Path) -> Result<(), String> {
+		unimplemented!()
 	}
 }
 
