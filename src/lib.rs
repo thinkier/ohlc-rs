@@ -68,13 +68,9 @@ impl OHLCRenderOptions {
 			let file_path = dir.path().join("chart.png");
 
 			let mut result = match self.render_and_save(data, &file_path) {
-				Ok(_) => Ok(Ok(())),
+				Ok(_) => Ok((callback)(&file_path)),
 				Err(err) => Err(err)
 			};
-
-			if result.is_ok() {
-				result = Ok((callback)(&file_path));
-			}
 
 			let _ = dir.close(); // Delete temporary directory
 
