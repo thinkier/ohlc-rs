@@ -77,9 +77,10 @@ impl OHLCRenderOptions {
 	/// Returns an error string originating from OHLC if an error occurs, and the result of the callback function otherwise.
 	pub fn render<F>(&self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
 		where F: Fn(&Path) -> Result<(), String> + Sized {
-		// Create temporary directory: mostly copied example from https://github.com/rust-lang-nursery/tempdir
 		let mut hasher = DefaultHasher::new();
 		data.hash(&mut hasher);
+
+		// Create temporary directory
 		if let Ok(dir) = TempDir::new(&format!("ohlc_render_{}", hasher.finish())) {
 			let file_path = dir.path().join("chart.png");
 
