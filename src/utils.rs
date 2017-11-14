@@ -1,6 +1,6 @@
 use super::*;
 
-pub fn calculaate_ohlc_of_set(data: &Vec<OHLC>) -> OHLC {
+pub fn calculate_ohlc_of_set(data: &Vec<OHLC>) -> OHLC {
 	let mut ohlc = OHLC::new();
 
 	if data.len() == 0 {

@@ -15,8 +15,11 @@ pub use options::*;
 use utils::*;
 
 use std::collections::hash_map::DefaultHasher;
+use std::fs::File;
 use std::hash::{Hash, Hasher};
 use std::path::*;
+
+use image::{ImageBuffer, Pixel};
 
 /// OHLC Chart Configuration, mutate through the methods
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -61,9 +64,9 @@ impl OHLCRenderOptions {
 			h_axis_options: AxisOptions::new(),
 			v_axis_options: AxisOptions::new(),
 			// Bright-ass red
-			down_colour: 0xFFFF0000,
+			down_colour: 0xFF0000FF,
 			// Bright-ass green
-			up_colour: 0xFF00FF00,
+			up_colour: 0x00FF00FF,
 		}
 	}
 
@@ -105,14 +108,51 @@ impl OHLCRenderOptions {
 	///
 	/// Returns an error string if an error occurs
 	pub fn render_and_save(&self, data: Vec<OHLC>, path: &Path) -> Result<(), String> {
-		let ohlc_of_set = calculaate_ohlc_of_set(&data);
+		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
-		let margin = 10; // 10px border padding
+		let margin = 10u32; // 10px border padding
 
-		let width = 6 * data.len() + (2 * margin - 1); // 5 px wide per candle, plus 1px padding on left, plus margin left and right
-		let height = (ohlc_of_set.range().round() as u64) + (2 * margin); // top and bottom margin, then 1 pixel = 1 value
+		let width = 6 * data.len() as u32 + (2 * margin - 1); // 5 px wide per candle, plus 1px padding on left, plus margin left and right
+		let height = (ohlc_of_set.range().round() as u32) + (2 * margin); // top and bottom margin, then 1 pixel = 1 value
 
-		unimplemented!()
+		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
+
+		for (i, ohlc_elem) in data.iter().enumerate() {
+			let colour = if ohlc_elem.o > ohlc_elem.c { self.down_colour } else { self.up_colour };
+
+			let x_ge = margin + i as u32 * 6 + 1;
+			let x_lt = margin + (i as u32 + 1) * 6;
+
+			let x_center = x_ge + 3;
+
+			for y in ((ohlc_elem.l - ohlc_of_set.l).round() as u32 + margin)..((ohlc_elem.h - ohlc_of_set.l).round() as u32 + margin) {
+				let mut chs = image_buffer
+					.get_pixel_mut(x_center, height - y)
+					.channels_mut();
+				for j in 0..4 {
+					chs[3 - j] = (colour >> (8 * j)) as u8;
+				}
+			}
+
+			for x in x_ge..x_lt {
+				for y in ((ohlc_elem.c - ohlc_of_set.l).round() as u32)..((ohlc_elem.o - ohlc_of_set.l).round() as u32) {
+					let mut chs = image_buffer
+						.get_pixel_mut(x, height - y)
+						.channels_mut();
+					for j in 0..4 {
+						chs[3 - j] = (colour >> (8 * j)) as u8;
+					}
+				}
+			}
+		}
+
+		match File::create(path) {
+			Ok(ref mut file) => match image::ImageRgba8(image_buffer).save(file, image::PNG) {
+				Ok(_) => Ok(()),
+				Err(err) => Err(format!("Image write error: {:?}", err))
+			}
+			Err(err) => Err(format!("File create error: {:?}", err))
+		}
 	}
 }
 
@@ -137,5 +177,21 @@ mod tests {
 			OHLCRenderOptions::new()
 				.colours(0x69696969, 0x69696969)
 		);
+	}
+
+	#[test]
+	fn render_simple() {
+		let _ = OHLCRenderOptions::new()
+			.render_and_save(vec![OHLC {
+				o: 1.0,
+				h: 2.0,
+				l: 0.0,
+				c: 1.0,
+			}, OHLC {
+				o: 2.0,
+				h: 4.0,
+				l: 0.0,
+				c: 1.0,
+			}], &Path::new("test.png"));
 	}
 }
