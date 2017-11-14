@@ -78,7 +78,9 @@ impl OHLCRenderOptions {
 	pub fn render<F>(&self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
 		where F: Fn(&Path) -> Result<(), String> + Sized {
 		// Create temporary directory: mostly copied example from https://github.com/rust-lang-nursery/tempdir
-		if let Ok(dir) = TempDir::new(&format!("ohlc_render_{:?}", data.hash(&mut DefaultHasher::new()))) {
+		let mut hasher = DefaultHasher::new();
+		data.hash(&mut hasher);
+		if let Ok(dir) = TempDir::new(&format!("ohlc_render_{}", hasher.finish())) {
 			let file_path = dir.path().join("chart.png");
 
 			let mut result = match self.render_and_save(data, &file_path) {
