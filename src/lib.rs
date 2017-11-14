@@ -63,6 +63,13 @@ impl OHLCRenderOptions {
 		}
 	}
 
+	pub fn colours(mut self, down: u32, up: u32) -> Self {
+		self.down_colour = down;
+		self.up_colour = up;
+
+		self
+	}
+
 	/// Renders the OHLC Chart by the data, using the configs provided.
 	///
 	/// Takes a lambda function for processing the image once it's rendered, do not do anything asynchronous with the image as it will be deleted as soon as the function finishes.
