@@ -8,7 +8,7 @@ pub struct AxisOptions {
 	/// RGBA(8) Colour used for lines drawn upon the graph
 	line_colour: u32,
 	/// Frequency of lines drawn
-	line_frequency: u32,
+	line_frequency: u64,
 	/// RGBA(8) Colour used for the labels
 	label_colour: u32,
 	/// Frequency of labelling
@@ -38,14 +38,31 @@ impl AxisOptions {
 		self
 	}
 
-	pub fn text_colour(mut self, colour: u32) -> Self {
-		self.text_colour = colour;
+	pub fn title_colour(mut self, colour: u32) -> Self {
+		self.title_colour = colour;
 
 		self
 	}
 
-	pub fn label_frequency(mut self, label_frequency: u64) -> Self {
-		self.label_frequency = label_frequency;
+	pub fn line_colour(mut self, colour: u32) -> Self {
+		self.line_colour = colour;
+
+		self
+	}
+
+	pub fn line_frequency(mut self, frequency: u64) -> Self {
+		self.line_frequency = frequency;
+
+		self
+	}
+	pub fn label_colour(mut self, colour: u32) -> Self {
+		self.label_colour = colour;
+
+		self
+	}
+
+	pub fn label_frequency(mut self, frequency: u64) -> Self {
+		self.label_frequency = frequency;
 
 		self
 	}
