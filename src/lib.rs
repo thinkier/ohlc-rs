@@ -110,37 +110,49 @@ impl OHLCRenderOptions {
 	pub fn render_and_save(&self, data: Vec<OHLC>, path: &Path) -> Result<(), String> {
 		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
-		let margin = 10u32; // 10px border padding
+		let margin = 40u32;
 
-		let width = 6 * data.len() as u32 + (2 * margin - 1); // 5 px wide per candle, plus 1px padding on left, plus margin left and right
-		let height = (ohlc_of_set.range().round() as u32) + (2 * margin); // top and bottom margin, then 1 pixel = 1 value
+		let width = 780;
+		let height = 350;
 
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
+
+		let candle_width = (width - (2 * margin)) as f64 / data.len() as f64;
+		let stick_width = (|x| if x < 1 { x } else { x })((candle_width / 20.).round() as u32);
+
+		let y_val_increment = ohlc_of_set.range() / (height - (2 * margin)) as f64;
 
 		for (i, ohlc_elem) in data.iter().enumerate() {
 			let colour = if ohlc_elem.o > ohlc_elem.c { self.down_colour } else { self.up_colour };
 
-			let x_ge = margin + i as u32 * 6 + 1;
-			let x_lt = margin + (i as u32 + 1) * 6;
+			// Yes, no left margin
+			let begin_pos = (candle_width * i as f64).round() as u32;
+			let end_pos = (candle_width * (i + 1) as f64).round() as u32;
 
-			let x_center = x_ge + 3;
-
-			for y in ((ohlc_elem.l - ohlc_of_set.l).round() as u32 + margin)..((ohlc_elem.h - ohlc_of_set.l).round() as u32 + margin) {
-				let mut chs = image_buffer
-					.get_pixel_mut(x_center, height - y)
-					.channels_mut();
-				for j in 0..4 {
-					chs[3 - j] = (colour >> (8 * j)) as u8;
-				}
-			}
-
-			for x in x_ge..x_lt {
-				for y in ((ohlc_elem.c - ohlc_of_set.l).round() as u32)..((ohlc_elem.o - ohlc_of_set.l).round() as u32) {
+			for y_state in (((ohlc_elem.c - ohlc_elem.l) / y_val_increment).round() as u32)..(((ohlc_elem.o - ohlc_elem.l) / y_val_increment).round() as u32) {
+				let y = height - y_state - margin;
+				for x in begin_pos..(end_pos + 1) {
 					let mut chs = image_buffer
-						.get_pixel_mut(x, height - y)
+						.get_pixel_mut(x, y)
 						.channels_mut();
 					for j in 0..4 {
 						chs[3 - j] = (colour >> (8 * j)) as u8;
+					}
+				}
+			}
+
+			{
+				let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as u32;
+				for y_state in (((ohlc_elem.l - ohlc_elem.l) / y_val_increment).round() as u32)..(((ohlc_elem.h - ohlc_elem.l) / y_val_increment).round() as u32) {
+					let y = height - y_state - margin;
+
+					for x in (x_center - stick_width) as u32..(x_center + stick_width) as u32 {
+						let mut chs = image_buffer
+							.get_pixel_mut(x, y)
+							.channels_mut();
+						for j in 0..4 {
+							chs[3 - j] = (colour >> (8 * j)) as u8;
+						}
 					}
 				}
 			}
