@@ -195,13 +195,12 @@ mod tests {
 	#[test]
 	fn render_simple() {
 		let _ = OHLCRenderOptions::new()
-			.render(vec![
-				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
-				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
-			], |path| if let Err(err) = fs::copy(path, &Path::new("test.png")) {
-				Err(format!("File copy error: {:?}", err))
-			} else {
-				Ok(())
-			});
+			.render(
+				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
+				|path| if let Err(err) = fs::copy(path, &Path::new("test.png")) {
+					Err(format!("File copy error: {:?}", err))
+				} else {
+					Ok(())
+				});
 	}
 }
