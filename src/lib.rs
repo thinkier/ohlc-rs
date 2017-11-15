@@ -133,8 +133,8 @@ impl OHLCRenderOptions {
 			let begin_pos = (candle_width * i as f64).round() as u32;
 			let end_pos = (candle_width * (i + 1) as f64).round() as u32;
 
-			let open_ys = ((ohlc_elem.o - ohlc_elem.l) / y_val_increment).round() as u32;
-			let close_ys = ((ohlc_elem.c - ohlc_elem.l) / y_val_increment).round() as u32;
+			let open_ys = ((ohlc_elem.o - ohlc_of_set.l) / y_val_increment).round() as u32;
+			let close_ys = ((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as u32;
 
 			for y_state in if open_ys > close_ys { close_ys..open_ys } else { open_ys..close_ys } {
 				let y = height - y_state - margin;
