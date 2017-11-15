@@ -163,7 +163,7 @@ impl OHLCRenderOptions {
 
 		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
 			for y_es in 0..(height - 2 * margin) {
-				if (|d| d < y_val_increment && d >= 0)((y_es as f64 * y_val_increment - ohlc_of_set.l) % self.v_axis_options.line_frequency) {
+				if (|d| d < y_val_increment && d >= 0.)((y_es as f64 * y_val_increment - ohlc_of_set.l) % self.v_axis_options.line_frequency) {
 					let y = y_es + margin;
 					for x in 0..(width - 2 * margin) {
 						let mut chs = image_buffer
@@ -309,10 +309,10 @@ mod tests {
 		let _ = OHLCRenderOptions::new()
 			.v_axis(|va| va
 				.line_colour(0x000000FF)
-				.line_frequency(0.25)
+				.line_frequency(5.)
 			)
 			.render_and_save(
-				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
+				vec![OHLC { o: 2.0, h: 12.0, l: 0.0, c: 6.0 }; 168],
 				&Path::new("test-draw-lines-vaxis.png")
 			);
 	}
