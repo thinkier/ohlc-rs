@@ -162,9 +162,8 @@ impl OHLCRenderOptions {
 		let y_val_increment = ohlc_of_set.range() / (height - (2 * margin)) as f64;
 
 		if self.h_axis_options.line_colour % 256 > 0 && self.h_axis_options.line_frequency > 0 {
-			let line_freq_y = self.h_axis_options.line_frequency / y_val_increment;
 			for y_es in 0..(height - 2 * margin) {
-				if (y_es * y_val_increment % self.h_axis_options.line_frequency) >= (self.h_axis_options.line_frequency - y_val_increment) {
+				if (y_es as f64 * y_val_increment % self.h_axis_options.line_frequency as f64) >= (self.h_axis_options.line_frequency as f64 - y_val_increment) {
 					let y = y_es + margin;
 					for x in 0..(width - 2 * margin) {
 						let mut chs = image_buffer
