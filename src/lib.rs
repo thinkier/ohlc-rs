@@ -136,7 +136,7 @@ impl OHLCRenderOptions {
 
 		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
-		let margin = 45u32;
+		let margin = 10u32;
 
 		let width = 1280;
 		let height = 720;
