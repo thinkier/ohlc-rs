@@ -45,7 +45,6 @@ pub struct OHLCRenderOptions {
 	/// Currently ignored
 	h_axis_options: AxisOptions,
 	/// Options for the vertical axis
-	/// Currently ignored
 	v_axis_options: AxisOptions,
 	/// RGBA(8) Colour for when the OHLC indicates fall
 	down_colour: u32,
