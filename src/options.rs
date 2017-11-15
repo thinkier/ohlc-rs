@@ -25,9 +25,9 @@ impl AxisOptions {
 			title: String::new(),
 			// 100% Opaque black
 			title_colour: 0x000000FF,
-			line_colour: 0x0000007F,
+			line_colour: 0x666666FF,
 			line_frequency: 0.0,
-			label_colour: 0x000000AF,
+			label_colour: 0xAAAAAAFF,
 			label_frequency: 0.0,
 		}
 	}
