@@ -167,17 +167,22 @@ impl OHLCRenderOptions {
 		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
 			for y_es in 0..(height - (margin_top + margin_bottom)) {
 				if (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency) {
-					let y = y_es + margin_top;
-					for x in 0..(width - (margin_left + margin_right)) {
-						let mut chs = image_buffer
-							.get_pixel_mut(x, y)
-							.channels_mut();
-						for j in 0..4 {
-							chs[3 - j] = (self.v_axis_options.line_colour >> (8 * j)) as u8;
+					{
+						let y = y_es + margin_top;
+						for x in 0..(width - (margin_left + margin_right)) {
+							let mut chs = image_buffer
+								.get_pixel_mut(x, y)
+								.channels_mut();
+							for j in 0..4 {
+								chs[3 - j] = (self.v_axis_options.line_colour >> (8 * j)) as u8;
+							}
 						}
 					}
 
-					// TODO Use the y here as the anchor for inserting the labels
+					//// TODO Use the y here as the anchor for inserting the labels
+					//for x in (width - margin_right + 10)..width {
+					//	let base_y = y_es + margin_top + 3; // Top...
+					//}
 				}
 			}
 		}
