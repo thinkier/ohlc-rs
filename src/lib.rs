@@ -136,7 +136,10 @@ impl OHLCRenderOptions {
 
 		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
-		let margin = 45u32;
+		let margin_top = 60u32;
+		let margin_bottom = 35u32;
+		let margin_left = 0u32;
+		let margin_right = 90u32;
 
 		let width = 1280;
 		let height = 720;
@@ -156,16 +159,16 @@ impl OHLCRenderOptions {
 			}
 		}
 
-		let candle_width = ((width - (2 * margin)) as f64 / data.len() as f64).floor();
+		let candle_width = ((width - (margin_left + margin_right)) as f64 / data.len() as f64).floor();
 		let stick_width = (|x| if x < 1 && candle_width >= 3. { 1 } else { x })((candle_width / 10. + 0.3).round() as u32);
 
-		let y_val_increment = ohlc_of_set.range() / (height - (2 * margin)) as f64;
+		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
 
 		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
-			for y_es in 0..(height - 2 * margin) {
+			for y_es in 0..(height - (margin_top + margin_bottom)) {
 				if (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency) {
-					let y = y_es + margin;
-					for x in 0..(width - 2 * margin) {
+					let y = y_es + margin_top;
+					for x in 0..(width - (margin_left + margin_right)) {
 						let mut chs = image_buffer
 							.get_pixel_mut(x, y)
 							.channels_mut();
@@ -190,7 +193,7 @@ impl OHLCRenderOptions {
 			let close_ys = ((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as u32;
 
 			for y_state in if open_ys > close_ys { close_ys..open_ys } else { open_ys..close_ys } {
-				let y = height - y_state - margin;
+				let y = height - y_state - margin_bottom;
 				// Introduce right padding if the candle isn't too short
 				for x in begin_pos..(if end_pos - begin_pos > 3 { end_pos - 1 } else { end_pos + 1 }) {
 					let mut chs = image_buffer
@@ -205,7 +208,7 @@ impl OHLCRenderOptions {
 			{
 				let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as u32;
 				for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
-					let y = height - y_state - margin;
+					let y = height - y_state - margin_bottom;
 
 					for x in (x_center - stick_width - 1) as u32..(x_center + stick_width - 1) as u32 {
 						let mut chs = image_buffer
