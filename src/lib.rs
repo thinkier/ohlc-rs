@@ -150,7 +150,7 @@ impl OHLCRenderOptions {
 
 			{
 				let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as u32;
-				for y_state in (((ohlc_elem.l - ohlc_elem.l) / y_val_increment).round() as u32)..(((ohlc_elem.h - ohlc_elem.l) / y_val_increment).round() as u32) {
+				for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
 					let y = height - y_state - margin;
 
 					for x in (x_center - stick_width) as u32..(x_center + stick_width) as u32 {
