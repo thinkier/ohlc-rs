@@ -161,16 +161,16 @@ impl OHLCRenderOptions {
 
 		let y_val_increment = ohlc_of_set.range() / (height - (2 * margin)) as f64;
 
-		if self.h_axis_options.line_colour % 256 > 0 && self.h_axis_options.line_frequency > 0. {
+		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
 			for y_es in 0..(height - 2 * margin) {
-				if (y_es as f64 * y_val_increment) % self.h_axis_options.line_frequency < y_val_increment {
+				if (y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency < y_val_increment {
 					let y = y_es + margin;
 					for x in 0..(width - 2 * margin) {
 						let mut chs = image_buffer
 							.get_pixel_mut(x, y)
 							.channels_mut();
 						for j in 0..4 {
-							chs[3 - j] = (self.h_axis_options.line_colour >> (8 * j)) as u8;
+							chs[3 - j] = (self.v_axis_options.line_colour >> (8 * j)) as u8;
 						}
 					}
 
@@ -305,9 +305,9 @@ mod tests {
 	}
 
 	#[test]
-	fn render_draw_lines() {
+	fn render_draw_v_axis_lines() {
 		let _ = OHLCRenderOptions::new()
-			.h_axis(|ax| ax
+			.v_axis(|va| va
 				.line_colour(0x000000FF)
 				.line_frequency(0.25)
 			)
