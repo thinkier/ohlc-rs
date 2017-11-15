@@ -170,6 +170,7 @@ impl OHLCRenderOptions {
 
 #[cfg(test)]
 mod tests {
+	use std::fs;
 	use super::*;
 
 	#[test]
@@ -194,7 +195,7 @@ mod tests {
 	#[test]
 	fn render_simple() {
 		let _ = OHLCRenderOptions::new()
-			.render_and_save(vec![OHLC {
+			.render(vec![OHLC {
 				o: 1.0,
 				h: 2.0,
 				l: 0.0,
@@ -204,6 +205,10 @@ mod tests {
 				h: 4.0,
 				l: 0.0,
 				c: 1.0,
-			}], &Path::new("test.png"));
+			}], |path| if let Err(err) = fs::copy(path, &Path::new("test.png")) {
+				Err(format!("File copy error: {:?}", err))
+			} else {
+				Ok(())
+			});
 	}
 }
