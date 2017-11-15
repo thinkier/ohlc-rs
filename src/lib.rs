@@ -313,7 +313,7 @@ mod tests {
 			)
 			.render_and_save(
 				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
-				&Path::new("test-draw_lines.png")
+				&Path::new("test-draw-lines-vaxis.png")
 			);
 	}
 
