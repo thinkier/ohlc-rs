@@ -86,13 +86,15 @@ impl OHLCRenderOptions {
 		self
 	}
 
-	pub fn h_axis(mut self, f: FnMut(AxisOptions) -> AxisOptions) -> Self {
+	pub fn h_axis<F>(mut self, mut f: F) -> Self
+		where F: FnMut(AxisOptions) -> AxisOptions {
 		self.h_axis_options = (f)(self.h_axis_options);
 
 		self
 	}
 
-	pub fn v_axis(mut self, f: FnMut(AxisOptions) -> AxisOptions) -> Self {
+	pub fn v_axis<F>(mut self, mut f: F) -> Self
+		where F: FnMut(AxisOptions) -> AxisOptions {
 		self.v_axis_options = (f)(self.v_axis_options);
 
 		self
