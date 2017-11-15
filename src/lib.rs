@@ -192,7 +192,7 @@ impl OHLCRenderOptions {
 			for y_state in if open_ys > close_ys { close_ys..open_ys } else { open_ys..close_ys } {
 				let y = height - y_state - margin;
 				// Introduce right padding if the candle isn't too short
-				for x in begin_pos..(end_pos + if end_pos - begin_pos > 3 { 0 } else { 1 }) {
+				for x in begin_pos..(if end_pos - begin_pos > 3 { end_pos - 1 } else { end_pos + 1 }) {
 					let mut chs = image_buffer
 						.get_pixel_mut(x, y)
 						.channels_mut();
@@ -207,7 +207,7 @@ impl OHLCRenderOptions {
 				for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
 					let y = height - y_state - margin;
 
-					for x in (x_center - stick_width) as u32..(x_center + stick_width) as u32 {
+					for x in (x_center - stick_width - 1) as u32..(x_center + stick_width - 1) as u32 {
 						let mut chs = image_buffer
 							.get_pixel_mut(x, y)
 							.channels_mut();
