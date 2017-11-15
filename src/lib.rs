@@ -136,10 +136,10 @@ impl OHLCRenderOptions {
 
 		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
-		let margin = 30u32;
+		let margin = 45u32;
 
-		let width = 600;
-		let height = 300;
+		let width = 1280;
+		let height = 720;
 
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
 
