@@ -333,7 +333,7 @@ mod tests {
 	fn render_temp_copy() {
 		let _ = OHLCRenderOptions::new()
 			.render(
-				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }],
+				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 3],
 				|path| if let Err(err) = fs::copy(path, &Path::new("test-temp-copy.png")) {
 					Err(format!("File copy error: {:?}", err))
 				} else {
