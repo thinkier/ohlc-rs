@@ -24,10 +24,10 @@ impl AxisOptions {
 		AxisOptions {
 			title: String::new(),
 			// 100% Opaque black
-			title_colour: 0xFF000000,
-			line_colour: 0x7F000000,
+			title_colour: 0x000000FF,
+			line_colour: 0x0000007F,
 			line_frequency: 0,
-			label_colour: 0xAF000000,
+			label_colour: 0x000000AF,
 			label_frequency: 0,
 		}
 	}
