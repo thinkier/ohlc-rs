@@ -86,6 +86,18 @@ impl OHLCRenderOptions {
 		self
 	}
 
+	pub fn h_axis(mut self, f: FnMut(AxisOptions) -> AxisOptions) -> Self {
+		self.h_axis_options = (f)(self.h_axis_options);
+
+		self
+	}
+
+	pub fn v_axis(mut self, f: FnMut(AxisOptions) -> AxisOptions) -> Self {
+		self.v_axis_options = (f)(self.v_axis_options);
+
+		self
+	}
+
 	/// Renders the OHLC Chart by the data, using the configs provided.
 	///
 	/// Takes a lambda function for processing the image once it's rendered, do not do anything asynchronous with the image as it will be deleted as soon as the function finishes.
