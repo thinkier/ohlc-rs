@@ -8,7 +8,7 @@ pub struct AxisOptions {
 	/// RGBA(8) Colour used for lines drawn upon the graph
 	pub(crate) line_colour: u32,
 	/// Frequency of lines drawn
-	pub(crate) line_frequency: u64,
+	pub(crate) line_frequency: f64,
 	/// RGBA(8) Colour used for the labels
 	pub(crate) label_colour: u32,
 	/// Frequency of labelling
@@ -16,7 +16,7 @@ pub struct AxisOptions {
 	/// The frequency is based on seconds for time, using data from [`OHLCRenderOptions.time_units`]
 	///
 	/// Setting this to 0 will disable labelling of values.
-	pub(crate) label_frequency: u64,
+	pub(crate) label_frequency: f64,
 }
 
 impl AxisOptions {
@@ -26,9 +26,9 @@ impl AxisOptions {
 			// 100% Opaque black
 			title_colour: 0x000000FF,
 			line_colour: 0x0000007F,
-			line_frequency: 0,
+			line_frequency: 0.0,
 			label_colour: 0x000000AF,
-			label_frequency: 0,
+			label_frequency: 0.0,
 		}
 	}
 
@@ -50,7 +50,7 @@ impl AxisOptions {
 		self
 	}
 
-	pub fn line_frequency(mut self, frequency: u64) -> Self {
+	pub fn line_frequency(mut self, frequency: f64) -> Self {
 		self.line_frequency = frequency;
 
 		self
@@ -61,7 +61,7 @@ impl AxisOptions {
 		self
 	}
 
-	pub fn label_frequency(mut self, frequency: u64) -> Self {
+	pub fn label_frequency(mut self, frequency: f64) -> Self {
 		self.label_frequency = frequency;
 
 		self

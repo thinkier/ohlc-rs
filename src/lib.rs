@@ -161,9 +161,9 @@ impl OHLCRenderOptions {
 
 		let y_val_increment = ohlc_of_set.range() / (height - (2 * margin)) as f64;
 
-		if self.h_axis_options.line_colour % 256 > 0 && self.h_axis_options.line_frequency > 0 {
+		if self.h_axis_options.line_colour % 256 > 0 && self.h_axis_options.line_frequency > 0. {
 			for y_es in 0..(height - 2 * margin) {
-				if (y_es as f64 * y_val_increment % self.h_axis_options.line_frequency as f64) < y_val_increment {
+				if (y_es as f64 * y_val_increment) % self.h_axis_options.line_frequency < y_val_increment {
 					let y = y_es + margin;
 					for x in 0..(width - 2 * margin) {
 						let mut chs = image_buffer
@@ -281,17 +281,17 @@ mod tests {
 				title: "I'm a meme".to_string(),
 				title_colour: 69,
 				line_colour: 70,
-				line_frequency: 71,
+				line_frequency: 71.,
 				label_colour: 72,
-				label_frequency: 73,
+				label_frequency: 73.,
 			},
 			AxisOptions::new()
 				.title("I'm a meme")
 				.title_colour(69)
 				.line_colour(70)
-				.line_frequency(71)
+				.line_frequency(71.)
 				.label_colour(72)
-				.label_frequency(73)
+				.label_frequency(73.)
 		);
 	}
 
@@ -301,6 +301,19 @@ mod tests {
 			.render_and_save(
 				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
 				&Path::new("test-repetition.png")
+			);
+	}
+
+	#[test]
+	fn render_draw_lines() {
+		let _ = OHLCRenderOptions::new()
+			.h_axis(|ax| ax
+				.line_colour(0x000000FF)
+				.line_frequency(0.25)
+			)
+			.render_and_save(
+				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
+				&Path::new("test-draw_lines.png")
 			);
 	}
 
