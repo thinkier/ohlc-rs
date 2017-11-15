@@ -108,6 +108,10 @@ impl OHLCRenderOptions {
 	///
 	/// Returns an error string if an error occurs
 	pub fn render_and_save(&self, data: Vec<OHLC>, path: &Path) -> Result<(), String> {
+		if let Err(err) = validate(&data) {
+			return Err(format!("Data validation error: {}", err));
+		}
+
 		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
 		let margin = 40u32;
@@ -129,10 +133,10 @@ impl OHLCRenderOptions {
 			let begin_pos = (candle_width * i as f64).round() as u32;
 			let end_pos = (candle_width * (i + 1) as f64).round() as u32;
 
-			let open_x = ((ohlc_elem.o - ohlc_elem.l) / y_val_increment).round() as u32;
-			let close_x = ((ohlc_elem.c - ohlc_elem.l) / y_val_increment).round() as u32;
+			let open_ys = ((ohlc_elem.o - ohlc_elem.l) / y_val_increment).round() as u32;
+			let close_ys = ((ohlc_elem.c - ohlc_elem.l) / y_val_increment).round() as u32;
 
-			for y_state in if open_x > close_x { close_x..open_x } else { open_x..close_x } {
+			for y_state in if open_ys > close_ys { close_ys..open_ys } else { open_ys..close_ys } {
 				let y = height - y_state - margin;
 				for x in begin_pos..(end_pos + 1) {
 					let mut chs = image_buffer
@@ -169,6 +173,25 @@ impl OHLCRenderOptions {
 			Err(err) => Err(format!("File create error: {:?}", err))
 		}
 	}
+}
+
+fn validate(data: &Vec<OHLC>) -> Result<(), &'static str> {
+	for elem in data {
+		return if elem.o > elem.h {
+			Err("Opening value is higher than high value.")
+		} else if elem.c > elem.h {
+			Err("Closing value is higher than high value.")
+		} else if elem.l > elem.h {
+			Err("Low value is higher than high value.")
+		} else if elem.o < elem.l {
+			Err("Opening value is lower than low value.")
+		} else if elem.c < elem.l {
+			Err("Closing value is lower than low value.")
+		} else {
+			continue
+		};
+	}
+	Ok(())
 }
 
 #[cfg(test)]
