@@ -156,7 +156,7 @@ impl OHLCRenderOptions {
 			}
 		}
 
-		let candle_width = (width - (2 * margin)) as f64 / data.len() as f64;
+		let candle_width = ((width - (2 * margin)) as f64 / data.len() as f64).floor();
 		let stick_width = (|x| if x < 1 && candle_width >= 3. { 1 } else { x })((candle_width / 10. + 0.3).round() as u32);
 
 		let y_val_increment = ohlc_of_set.range() / (height - (2 * margin)) as f64;
@@ -183,8 +183,8 @@ impl OHLCRenderOptions {
 			let colour = if ohlc_elem.o > ohlc_elem.c { self.down_colour } else { self.up_colour };
 
 			// Yes, no left margin
-			let begin_pos = (candle_width * i as f64).round() as u32;
-			let end_pos = (candle_width * (i + 1) as f64).round() as u32;
+			let begin_pos = (candle_width * i as f64) as u32;
+			let end_pos = (candle_width * (i + 1) as f64) as u32;
 
 			let open_ys = ((ohlc_elem.o - ohlc_of_set.l) / y_val_increment).round() as u32;
 			let close_ys = ((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as u32;
