@@ -8,11 +8,11 @@ use tempdir::*;
 
 pub mod data;
 pub mod options;
-mod utils;
+pub mod utils;
 
 pub use data::*;
 pub use options::*;
-use utils::*;
+pub use utils::*;
 
 use std::collections::hash_map::DefaultHasher;
 use std::fs::File;
