@@ -118,7 +118,7 @@ impl OHLCRenderOptions {
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
 
 		let candle_width = (width - (2 * margin)) as f64 / data.len() as f64;
-		let stick_width = (|x| if x < 1 { x } else { x })((candle_width / 20.).round() as u32);
+		let stick_width = (|x| if x < 1 && candle_width >= 3 { 1 } else { x })((candle_width / 10. + 0.3).round() as u32);
 
 		let y_val_increment = ohlc_of_set.range() / (height - (2 * margin)) as f64;
 
@@ -195,17 +195,34 @@ mod tests {
 	#[test]
 	fn render_simple() {
 		let _ = OHLCRenderOptions::new()
-			.render(vec![OHLC {
-				o: 1.0,
-				h: 2.0,
-				l: 0.0,
-				c: 1.0,
-			}, OHLC {
-				o: 2.0,
-				h: 4.0,
-				l: 0.0,
-				c: 1.0,
-			}], |path| if let Err(err) = fs::copy(path, &Path::new("test.png")) {
+			.render(vec![
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+				OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 },
+				OHLC { o: 1.0, h: 2.0, l: 0.0, c: 1.0 },
+			], |path| if let Err(err) = fs::copy(path, &Path::new("test.png")) {
 				Err(format!("File copy error: {:?}", err))
 			} else {
 				Ok(())
