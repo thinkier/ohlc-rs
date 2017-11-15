@@ -118,7 +118,7 @@ impl OHLCRenderOptions {
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
 
 		let candle_width = (width - (2 * margin)) as f64 / data.len() as f64;
-		let stick_width = (|x| if x < 1 && candle_width >= 3 { 1 } else { x })((candle_width / 10. + 0.3).round() as u32);
+		let stick_width = (|x| if x < 1 && candle_width >= 3. { 1 } else { x })((candle_width / 10. + 0.3).round() as u32);
 
 		let y_val_increment = ohlc_of_set.range() / (height - (2 * margin)) as f64;
 
