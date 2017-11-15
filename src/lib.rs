@@ -29,7 +29,9 @@ pub struct OHLCRenderOptions {
 	title: String,
 	/// Currently ignored
 	/// Colour for the title of the chart
-	text_colour: u32,
+	title_colour: u32,
+	/// Background colour of the entire chart
+	background_colour: u32,
 	/// The prefix for the values represented in the OHLC
 	/// Currently ignored
 	value_prefix: String,
@@ -56,7 +58,8 @@ impl OHLCRenderOptions {
 	pub fn new() -> OHLCRenderOptions {
 		OHLCRenderOptions {
 			title: String::new(),
-			text_colour: 0,
+			title_colour: 0,
+			background_colour: 0xEEEEEEEE,
 			value_prefix: String::new(),
 			value_suffix: String::new(),
 			// Default is 1 hour
@@ -70,9 +73,15 @@ impl OHLCRenderOptions {
 		}
 	}
 
-	pub fn colours(mut self, down: u32, up: u32) -> Self {
+	pub fn indicator_colours(mut self, down: u32, up: u32) -> Self {
 		self.down_colour = down;
 		self.up_colour = up;
+
+		self
+	}
+
+	pub fn background_colour(mut self, colour: u32) -> Self {
+		self.background_colour = colour;
 
 		self
 	}
@@ -120,6 +129,19 @@ impl OHLCRenderOptions {
 		let height = 350;
 
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
+
+		if self.background_colour % 256 > 0 {
+			for x in 0..width {
+				for y in 0..height {
+					let mut chs = image_buffer
+						.get_pixel_mut(x, y)
+						.channels_mut();
+					for j in 0..4 {
+						chs[3 - j] = (self.background_colour >> (8 * j)) as u8;
+					}
+				}
+			}
+		}
 
 		let candle_width = (width - (2 * margin)) as f64 / data.len() as f64;
 		let stick_width = (|x| if x < 1 && candle_width >= 3. { 1 } else { x })((candle_width / 10. + 0.3).round() as u32);
@@ -204,7 +226,7 @@ mod tests {
 		assert_eq!(
 			OHLCRenderOptions {
 				title: String::new(),
-				text_colour: 0,
+				title_colour: 0,
 				value_prefix: String::new(),
 				value_suffix: String::new(),
 				time_units: 3600,
@@ -214,7 +236,7 @@ mod tests {
 				up_colour: 0x69696969,
 			},
 			OHLCRenderOptions::new()
-				.colours(0x69696969, 0x69696969)
+				.indicator_colours(0x69696969, 0x69696969)
 		);
 	}
 
