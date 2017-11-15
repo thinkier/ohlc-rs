@@ -235,7 +235,7 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn modifiers() {
+	fn render_options_modification() {
 		assert_eq!(
 			OHLCRenderOptions {
 				title: String::new(),
@@ -252,6 +252,27 @@ mod tests {
 			OHLCRenderOptions::new()
 				.indicator_colours(0x69696969, 0x69696969)
 				.background_colour(0xFEFEFEFE)
+		);
+	}
+
+	#[test]
+	fn axis_options_modification() {
+		assert_eq!(
+			AxisOptions {
+				title: "I'm a meme".to_string(),
+				title_colour: 69,
+				line_colour: 70,
+				line_frequency: 71,
+				label_colour: 72,
+				label_frequency: 73,
+			},
+			AxisOptions::new()
+				.title("I'm a meme")
+				.title_colour(69)
+				.line_colour(70)
+				.line_frequency(71)
+				.label_colour(72)
+				.label_frequency(73)
 		);
 	}
 
