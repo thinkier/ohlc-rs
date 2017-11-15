@@ -26,30 +26,30 @@ use image::{ImageBuffer, Pixel};
 pub struct OHLCRenderOptions {
 	/// Title of the chart
 	/// Currently ignored
-	title: String,
+	pub(crate) title: String,
 	/// Currently ignored
 	/// Colour for the title of the chart
-	title_colour: u32,
+	pub(crate) title_colour: u32,
 	/// Background colour of the entire chart
-	background_colour: u32,
+	pub(crate) background_colour: u32,
 	/// The prefix for the values represented in the OHLC
 	/// Currently ignored
-	value_prefix: String,
+	pub(crate) value_prefix: String,
 	/// The suffix for the values represented in the OHLC
 	/// Currently ignored
-	value_suffix: String,
+	pub(crate) value_suffix: String,
 	/// The amount of time, in seconds, each OHLC objects represent
 	/// Currently ignored
-	time_units: u64,
+	pub(crate) time_units: u64,
 	/// Options for the horizontal axis
 	/// Currently ignored
-	h_axis_options: AxisOptions,
+	pub(crate) h_axis_options: AxisOptions,
 	/// Options for the vertical axis
-	v_axis_options: AxisOptions,
+	pub(crate) v_axis_options: AxisOptions,
 	/// RGBA(8) Colour for when the OHLC indicates fall
-	down_colour: u32,
+	pub(crate) down_colour: u32,
 	/// RGBA(8) Colour for when the OHLC indicates rise
-	up_colour: u32,
+	pub(crate) up_colour: u32,
 }
 
 impl OHLCRenderOptions {
