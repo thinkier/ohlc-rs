@@ -59,7 +59,7 @@ impl OHLCRenderOptions {
 		OHLCRenderOptions {
 			title: String::new(),
 			title_colour: 0,
-			background_colour: 0xEEEEEEEE,
+			background_colour: 0xDDDDDDFF,
 			value_prefix: String::new(),
 			value_suffix: String::new(),
 			// Default is 1 hour
@@ -160,7 +160,8 @@ impl OHLCRenderOptions {
 
 			for y_state in if open_ys > close_ys { close_ys..open_ys } else { open_ys..close_ys } {
 				let y = height - y_state - margin;
-				for x in begin_pos..(end_pos + 1) {
+				// Introduce right padding if the candle isn't too short
+				for x in begin_pos..(end_pos + if end_pos - begin_pos > 3 { 0 } else { 1 }) {
 					let mut chs = image_buffer
 						.get_pixel_mut(x, y)
 						.channels_mut();
@@ -227,6 +228,7 @@ mod tests {
 			OHLCRenderOptions {
 				title: String::new(),
 				title_colour: 0,
+				background_colour: 0xDDDDDDFF,
 				value_prefix: String::new(),
 				value_suffix: String::new(),
 				time_units: 3600,
