@@ -228,7 +228,7 @@ mod tests {
 			OHLCRenderOptions {
 				title: String::new(),
 				title_colour: 0,
-				background_colour: 0xDDDDDDFF,
+				background_colour: 0xFEFEFEFE,
 				value_prefix: String::new(),
 				value_suffix: String::new(),
 				time_units: 3600,
@@ -239,6 +239,7 @@ mod tests {
 			},
 			OHLCRenderOptions::new()
 				.indicator_colours(0x69696969, 0x69696969)
+				.background_colour(0xFEFEFEFE)
 		);
 	}
 
