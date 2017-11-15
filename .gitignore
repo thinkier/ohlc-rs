@@ -12,3 +12,5 @@ Cargo.lock
 # IntelliJ
 .idea
 *.iml
+
+test-*.png

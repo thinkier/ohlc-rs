@@ -129,7 +129,10 @@ impl OHLCRenderOptions {
 			let begin_pos = (candle_width * i as f64).round() as u32;
 			let end_pos = (candle_width * (i + 1) as f64).round() as u32;
 
-			for y_state in (((ohlc_elem.c - ohlc_elem.l) / y_val_increment).round() as u32)..(((ohlc_elem.o - ohlc_elem.l) / y_val_increment).round() as u32) {
+			let open_x = ((ohlc_elem.o - ohlc_elem.l) / y_val_increment).round() as u32;
+			let close_x = ((ohlc_elem.c - ohlc_elem.l) / y_val_increment).round() as u32;
+
+			for y_state in if open_x > close_x { close_x..open_x } else { open_x..close_x } {
 				let y = height - y_state - margin;
 				for x in begin_pos..(end_pos + 1) {
 					let mut chs = image_buffer
@@ -193,11 +196,32 @@ mod tests {
 	}
 
 	#[test]
-	fn render_simple() {
+	fn render_repetition() {
+		let _ = OHLCRenderOptions::new()
+			.render_and_save(
+				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
+				&Path::new("test-repetition.png")
+			);
+	}
+
+	#[test]
+	fn render_up_down() {
+		let _ = OHLCRenderOptions::new()
+			.render_and_save(
+				vec![
+					OHLC { o: 1.0, h: 4.0, l: 0.0, c: 2.0 },
+					OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }
+				],
+				&Path::new("test-up-down.png")
+			);
+	}
+
+	#[test]
+	fn render_temp_copy() {
 		let _ = OHLCRenderOptions::new()
 			.render(
-				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
-				|path| if let Err(err) = fs::copy(path, &Path::new("test.png")) {
+				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }],
+				|path| if let Err(err) = fs::copy(path, &Path::new("test-temp-copy.png")) {
 					Err(format!("File copy error: {:?}", err))
 				} else {
 					Ok(())
