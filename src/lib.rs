@@ -179,10 +179,10 @@ impl OHLCRenderOptions {
 						}
 					}
 
-					//// TODO Use the y here as the anchor for inserting the labels
-					//for x in (width - margin_right + 10)..width {
-					//	let base_y = y_es + margin_top + 3; // Top...
-					//}
+					// TODO Use the y here as the anchor for inserting the labels
+					for x in (width - margin_right + 10)..width {
+						let base_y = y_es + margin_top + 3; // Top...
+					}
 				}
 			}
 		}
