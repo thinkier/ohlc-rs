@@ -378,6 +378,7 @@ mod tests {
 				for ptr_y in 0..(12 + 1) {
 					output += "\t\t";
 					for ptr_x in 0..(7 + 1) {
+						// Need to widen canvas by 2px to prevent oob, should also add inter-character spacing to prevent 2 chars from interfering with one another
 						let x = (base_x * 7) + ptr_x;
 						let y = (base_y * 12) + ptr_y;
 
