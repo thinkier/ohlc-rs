@@ -202,6 +202,8 @@ impl OHLCRenderOptions {
 			let open_ys = ((ohlc_elem.o - ohlc_of_set.l) / y_val_increment).round() as u32;
 			let close_ys = ((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as u32;
 
+			let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as u32;
+
 			for y_state in if open_ys > close_ys { close_ys..(1 + open_ys) } else { open_ys..(1 + close_ys) } {
 				let y = height - y_state - margin_bottom;
 				// Introduce right padding if the candle isn't too short
@@ -215,25 +217,27 @@ impl OHLCRenderOptions {
 				}
 			}
 
-			{
-				let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as u32;
-				for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
-					let y = height - y_state - margin_bottom;
+			for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
+				let y = height - y_state - margin_bottom;
 
-					for x in (x_center - stick_width - 1) as u32..(x_center + stick_width - 1) as u32 {
-						let mut chs = image_buffer
-							.get_pixel_mut(x, y)
-							.channels_mut();
-						for j in 0..4 {
-							chs[3 - j] = (colour >> (8 * j)) as u8;
-						}
+				for x in (x_center - stick_width - 1) as u32..(x_center + stick_width - 1) as u32 {
+					let mut chs = image_buffer
+						.get_pixel_mut(x, y)
+						.channels_mut();
+					for j in 0..4 {
+						chs[3 - j] = (colour >> (8 * j)) as u8;
 					}
 				}
 			}
 
 			if i == data.len() - 1 {
+				let no_touching_zone = (|x| if x < 1 { 1 } else { x })(stick_width / 2);
+
 				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
 				for x in margin_left..(width - margin_right) {
+					if x == x_center || (x_center > x && x_center - x - 1 < no_touching_zone) || (x_center < x && x - x_center - 1 < no_touching_zone) {
+						continue;
+					}
 					let mut chs = image_buffer
 						.get_pixel_mut(x, y)
 						.channels_mut();
