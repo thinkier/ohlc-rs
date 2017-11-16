@@ -275,8 +275,10 @@ fn validate(data: &Vec<OHLC>) -> Result<(), &'static str> {
 
 #[cfg(test)]
 mod tests {
+	extern crate serde_json;
+
 	use std::fs;
-	use std::io::Write;
+	use std::io::{Read, Write};
 	use super::*;
 	use image::GenericImage;
 
@@ -321,6 +323,21 @@ mod tests {
 				.label_colour(72)
 				.label_frequency(73.)
 		);
+	}
+
+	#[test]
+	fn render_draw_sample_data() {
+		let mut buf = String::new();
+		let _ = File::open("sample_data.json").unwrap().read_to_string(&mut buf);
+		let _ = OHLCRenderOptions::new()
+			.v_axis(|va| va
+				.line_colour(0x000000FF)
+				.line_frequency(200.)
+			)
+			.render_and_save(
+				self::serde_json::from_str(&buf).unwrap(),
+				&Path::new("test-draw-sample-data.png")
+			);
 	}
 
 	#[test]
