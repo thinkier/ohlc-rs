@@ -231,6 +231,7 @@ impl OHLCRenderOptions {
 			}
 
 			if i == data.len() - 1 {
+				// TODO Add a `x` symbol instead.
 				let no_touching_zone = (|x| if x < 1 { 1 } else { x })(stick_width / 2);
 
 				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
