@@ -32,6 +32,8 @@ pub struct OHLCRenderOptions {
 	pub(crate) title_colour: u32,
 	/// Background colour of the entire chart
 	pub(crate) background_colour: u32,
+	/// Colour for the "current value" dot and line across the chart
+	pub(crate) current_value_colour: u32,
 	/// The prefix for the values represented in the OHLC
 	/// Currently ignored
 	pub(crate) value_prefix: String,
@@ -59,6 +61,8 @@ impl OHLCRenderOptions {
 			title: String::new(),
 			title_colour: 0,
 			background_colour: 0xDDDDDDFF,
+			// Bright-ass blue
+			current_value_colour: 0x0000FFFF,
 			value_prefix: String::new(),
 			value_suffix: String::new(),
 			// Default is 1 hour
@@ -72,7 +76,8 @@ impl OHLCRenderOptions {
 		}
 	}
 
-	pub fn indicator_colours(mut self, down: u32, up: u32) -> Self {
+	pub fn indicator_colours(mut self, current_val: u32, down: u32, up: u32) -> Self {
+		self.current_value_colour = current_val;
 		self.down_colour = down;
 		self.up_colour = up;
 
@@ -270,16 +275,17 @@ mod tests {
 				title: String::new(),
 				title_colour: 0,
 				background_colour: 0xFEFEFEFE,
+				current_value_colour: 0x69696968,
 				value_prefix: String::new(),
 				value_suffix: String::new(),
 				time_units: 3600,
 				h_axis_options: AxisOptions::new(),
 				v_axis_options: AxisOptions::new(),
 				down_colour: 0x69696969,
-				up_colour: 0x69696969,
+				up_colour: 0x69696970,
 			},
 			OHLCRenderOptions::new()
-				.indicator_colours(0x69696969, 0x69696969)
+				.indicator_colours(0x69696968, 0x69696969, 0x69696970)
 				.background_colour(0xFEFEFEFE)
 		);
 	}
