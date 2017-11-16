@@ -231,19 +231,26 @@ impl OHLCRenderOptions {
 			}
 
 			if i == data.len() - 1 {
-				// TODO Add a `x` symbol instead.
-				let no_touching_zone = (|x| if x < 1 { 1 } else { x })(stick_width / 2);
-
 				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
 				for x in margin_left..(width - margin_right) {
-					if x == x_center || (x_center > x && x_center - x - 1 < no_touching_zone) || (x_center < x && x - x_center - 1 < no_touching_zone) {
-						continue;
-					}
 					let mut chs = image_buffer
 						.get_pixel_mut(x, y)
 						.channels_mut();
 					for j in 0..4 {
 						chs[3 - j] = (self.current_value_colour >> (8 * j)) as u8;
+					}
+				}
+
+				for x_offset in -2i32..3 {
+					for y_offset in -2i32..3 {
+						if !(x_offset == y_offset || x_offset + y_offset == 0 || x_offset == 0) { continue }
+
+						let mut chs = image_buffer
+							.get_pixel_mut((x_offset + (x_center as i32)) as u32, (y_offset + (y as i32)) as u32)
+							.channels_mut();
+						for j in 0..4 {
+							chs[3 - j] = (self.current_value_colour >> (8 * j)) as u8;
+						}
 					}
 				}
 			}
