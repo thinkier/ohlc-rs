@@ -290,7 +290,7 @@ impl OHLCRenderOptions {
 			if do_border {
 				for x in (base_x - 1)..(base_x + 10 * chars_len as u32 + 1) {
 					for y_mag in 0..2 {
-						let y = base_y + y_mag * 17 + y_mag * 2 - 1;
+						let y = base_y + y_mag * 17 + y_mag * 1 - 1;
 
 						let mut chs = image_buffer
 							.get_pixel_mut(x, y)
