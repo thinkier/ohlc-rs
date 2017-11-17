@@ -285,37 +285,33 @@ impl OHLCRenderOptions {
 
 		// Text renderer section
 		for (chars, base_x, base_y, colour, do_border) in text_renders {
+			let chars_len = chars.len();
+
+			if do_border {
+				// TODO draw a box with the predetermined label colour
+				let add_or_sub = |d| if d > base_x { d + 1 } else { d - 1 };
+				for x_mag in 0..2 {
+					for y_mag in 0..2 {
+						let x = (add_or_sub)(base_x + x_mag * 10 * chars_len as u32);
+						let y = (add_or_sub)(base_y + y_mag * 17);
+
+						let mut chs = image_buffer
+							.get_pixel_mut(x, y)
+							.channels_mut();
+						for j in 0..4 {
+							chs[3 - j] = (colour >> (8 * j)) as u8;
+						}
+					}
+				}
+			}
+
 			// 10 is character width; f_x is starting at the left edge of the margin
-			for f_x in 0usize..chars.len() {
+			for f_x in 0usize..chars_len {
 				let char_font: &[u8; 170] = &fonts::ASCII_TABLE[chars[(|d| if d < 127 { d } else { 0x20 })(f_x)] as usize];
 				for incr_y in 0usize..17 {
 					for incr_x in 0usize..10 {
 						let x = base_x + (incr_x + f_x * 10) as u32;
 						let y = base_y + incr_y as u32;
-
-						if do_border {
-							// TODO draw a box with the predetermined label colour
-							let mut paint_cords: Option<(u32, u32)> = None;
-							if incr_y == 0 {
-								paint_cords = Some((x, y - 1));
-							} else if incr_y == 16 {
-								paint_cords = Some((x, y + 1));
-							}
-							if incr_x == 0 {
-								paint_cords = Some((x - 1, paint_cords.unwrap_or((0, y)).1));
-							} else if incr_x == 9 {
-								paint_cords = Some((x + 1, paint_cords.unwrap_or((0, y)).1));
-							}
-
-							if let Some((x, y)) = paint_cords {
-								let mut chs = image_buffer
-									.get_pixel_mut(x, y)
-									.channels_mut();
-								for j in 0..4 {
-									chs[3 - j] = (colour >> (8 * j)) as u8;
-								}
-							}
-						}
 
 						let shade_at_pos = char_font[incr_x + incr_y * 10] as u32;
 
