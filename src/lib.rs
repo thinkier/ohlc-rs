@@ -446,11 +446,10 @@ mod tests {
 		let _ = File::open("sample_data.json").unwrap().read_to_string(&mut buf);
 		let _ = OHLCRenderOptions::new()
 			.v_axis(|va| va
-				.line_colour(0x000000FF)
-				.line_frequency(200.)
-				.label_colour(0x0000FF)
-				.label_frequency(200.)
+				.line(0x000000FF, 200.)
+				.label(0x000000FF, 200.)
 			)
+			.value_strings("$", "")
 			.render_and_save(
 				self::serde_json::from_str(&buf).unwrap(),
 				&Path::new("test-draw-sample-data.png")
