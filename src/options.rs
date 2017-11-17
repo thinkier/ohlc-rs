@@ -32,36 +32,22 @@ impl AxisOptions {
 		}
 	}
 
-	pub fn title(mut self, title: &str) -> Self {
+	pub fn title(mut self, title: &str, colour: u32) -> Self {
 		self.title = title.to_string();
-
-		self
-	}
-
-	pub fn title_colour(mut self, colour: u32) -> Self {
 		self.title_colour = colour;
 
 		self
 	}
 
-	pub fn line_colour(mut self, colour: u32) -> Self {
+	pub fn line(mut self, colour: u32, frequency: f64) -> Self {
 		self.line_colour = colour;
-
-		self
-	}
-
-	pub fn line_frequency(mut self, frequency: f64) -> Self {
 		self.line_frequency = frequency;
 
 		self
 	}
-	pub fn label_colour(mut self, colour: u32) -> Self {
+
+	pub fn label(mut self, colour: u32, frequency: f64) -> Self {
 		self.label_colour = colour;
-
-		self
-	}
-
-	pub fn label_frequency(mut self, frequency: f64) -> Self {
 		self.label_frequency = frequency;
 
 		self
