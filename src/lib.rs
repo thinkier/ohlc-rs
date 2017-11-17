@@ -140,8 +140,8 @@ impl OHLCRenderOptions {
 			return Err(format!("Data validation error: {}", err));
 		}
 
-		// String.bytes, top edge x, leftmost edge y, colour
-		let mut text_renders: Vec<(Vec<u8>, u32, u32, u32)> = vec![];
+		// String.bytes, top edge x, leftmost edge y, colour, do a border
+		let mut text_renders: Vec<(Vec<u8>, u32, u32, u32, bool)> = vec![];
 
 		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
@@ -193,11 +193,12 @@ impl OHLCRenderOptions {
 				if self.v_axis_options.label_colour % 256 != 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
 					let base_y = y_es + margin_top - 8; // Top edge...
 
-					let chars = format!("{}", ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency).into_bytes();
+					let mut chars = format!("{}", ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency).into_bytes();
 
-					if chars.len() <= ((margin_right as f32 - 10.) / 10.).floor() as usize {
-						text_renders.push((chars, width - margin_right + 10u32, base_y, self.v_axis_options.label_colour))
+					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
+						let _ = chars.pop();
 					}
+					text_renders.push((chars, width - margin_right + 10u32, base_y, self.v_axis_options.label_colour, true))
 				}
 			}
 		}
@@ -267,23 +268,70 @@ impl OHLCRenderOptions {
 						}
 					}
 				}
+
+				// Add label to the closing value
+				{
+					let mut chars = format!("{}", ohlc_of_set.c).into_bytes();
+
+					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
+						let _ = chars.pop();
+					}
+					text_renders.push((chars, width - margin_right + 10u32, y - 8, self.current_value_colour, true))
+				}
 			}
 		}
 
+		text_renders.push((self.title.clone().into_bytes(), 0, 0, self.title_colour, false));
+
 		// Text renderer section
-		for (chars, base_x, base_y, colour) in text_renders {
+		for (chars, base_x, base_y, colour, do_border) in text_renders {
 			// 10 is character width; f_x is starting at the left edge of the margin
 			for f_x in 0usize..chars.len() {
 				let char_font: &[u8; 170] = &fonts::ASCII_TABLE[chars[(|d| if d < 127 { d } else { 0x20 })(f_x)] as usize];
 				for incr_y in 0usize..17 {
 					for incr_x in 0usize..10 {
+						let x = base_x + (incr_x + f_x * 10) as u32;
+						let y = base_y + incr_y as u32;
+
+						if do_border {
+							// TODO draw a box with the predetermined label colour
+							let mut paint_cords: Option<(u32, u32)> = None;
+							if incr_y == 0 {
+								paint_cords = Some((x, y - 1));
+							} else if incr_y == 16 {
+								paint_cords = Some((x, y + 1));
+							}
+							if incr_x == 0 {
+								paint_cords = Some((x - 1, paint_cords.unwrap_or((0, y)).1));
+							} else if incr_x == 9 {
+								paint_cords = Some((x + 1, paint_cords.unwrap_or((0, y)).1));
+							}
+
+							if let Some((x, y)) = paint_cords {
+								let mut chs = image_buffer
+									.get_pixel_mut(x, y)
+									.channels_mut();
+								for j in 0..4 {
+									chs[3 - j] = (colour >> (8 * j)) as u8;
+								}
+							}
+						}
+
 						let shade_at_pos = char_font[incr_x + incr_y * 10] as u32;
 
-						if shade_at_pos == 0 { continue }
+						if shade_at_pos == 0 {
+							let mut chs = image_buffer
+								.get_pixel_mut(x, y)
+								.channels_mut();
+							for j in 0..4 {
+								chs[3 - j] = (self.background_colour >> (8 * j)) as u8;
+							}
+							continue;
+						}
 
 						let mut chs = image_buffer
 							// Translate right 10px and up 17px otherwise it'd look weird ass
-							.get_pixel_mut(base_x + (f_x * 10 + incr_x) as u32, base_y + incr_y as u32)
+							.get_pixel_mut(x, y)
 							.channels_mut();
 
 						// Don't modify the alpha channel
