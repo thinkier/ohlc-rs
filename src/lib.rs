@@ -186,7 +186,8 @@ impl OHLCRenderOptions {
 					}
 
 					// TODO Use the y here as the anchor for inserting the labels
-					for x in (width - margin_right + 10)..width {
+					// 10 is character width
+					for base_x in 0..((margin_right as f32 / 10.).floor() as u32) {
 						let base_y = y_es + margin_top + 3; // Top...
 					}
 				}
