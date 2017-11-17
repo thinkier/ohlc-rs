@@ -257,9 +257,9 @@ impl OHLCRenderOptions {
 			// Current value line is rendered inside here.
 			if i == data.len() - 1 {
 				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
-				for x in margin_left..(width - margin_right) {
+				for half_x in (margin_left / 2)..((width - margin_right) / 2) {
 					let mut chs = image_buffer
-						.get_pixel_mut(x, y)
+						.get_pixel_mut(half_x * 2, y)
 						.channels_mut();
 					for j in 0..4 {
 						chs[3 - j] = (self.current_value_colour >> (8 * j)) as u8;
