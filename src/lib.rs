@@ -7,6 +7,7 @@ extern crate tempdir;
 use tempdir::*;
 
 pub mod data;
+mod fonts;
 pub mod options;
 pub mod utils;
 
@@ -401,7 +402,7 @@ mod tests {
 	// Technically not a test, it just generates the fonts array based on the fonts png.
 	#[test]
 	fn generate_fonts_file() {
-		let img = image::open("consolas-12-ascii-table.png").unwrap();
+		let img = image::open("consolas-18px-ascii-table.png").unwrap();
 
 		// Character sizes are 7 wide, 12 tall
 
@@ -410,11 +411,11 @@ mod tests {
 
 		// Printables are 0x20 - 0x7E
 
-		let mut output = "pub const ASCII_TABLE: [[u8; 84]; 126] = [\n".to_string();
+		let mut output = "pub const ASCII_TABLE: [[u8; 170]; 127] = [\n".to_string();
 
 		// 0x00 to 0x20 is filled with blank
 		for _ in 0..(32 + 1) {
-			output += "\t[0u8; 84],\n";
+			output += "\t[0u8; 170],\n";
 		}
 
 		for base_y in 2..8 {
@@ -422,12 +423,11 @@ mod tests {
 				if (base_y == 7 && base_x == 15) || (base_y == 2 && base_x == 0) { continue }
 				output += "\t[\n";
 				// Write character into array.
-				for ptr_y in 0..(12 + 1) {
+				for ptr_y in 0..17 {
 					output += "\t\t";
-					for ptr_x in 0..(7 + 1) {
-						// Need to widen canvas by 2px to prevent oob, should also add inter-character spacing to prevent 2 chars from interfering with one another
-						let x = (base_x * 7) + ptr_x;
-						let y = (base_y * 12) + ptr_y;
+					for ptr_x in 0..10 {
+						let x = (base_x * 20) + 10 + ptr_x;
+						let y = (base_y * 18) + ptr_y;
 
 						output += &format!("{},", 255 - img.get_pixel(x, y).data[0]);
 					}
