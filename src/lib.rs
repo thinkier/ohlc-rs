@@ -354,51 +354,53 @@ mod tests {
 			);
 	}
 
-	#[test]
-	fn render_repetition() {
-		let _ = OHLCRenderOptions::new()
-			.render_and_save(
-				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
-				&Path::new("test-repetition.png")
-			);
-	}
+	/*
+		#[test]
+		fn render_repetition() {
+			let _ = OHLCRenderOptions::new()
+				.render_and_save(
+					vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
+					&Path::new("test-repetition.png")
+				);
+		}
 
-	#[test]
-	fn render_draw_v_axis_lines() {
-		let _ = OHLCRenderOptions::new()
-			.v_axis(|va| va
-				.line_colour(0x000000FF)
-				.line_frequency(5.)
-			)
-			.render_and_save(
-				vec![OHLC { o: 2.0, h: 12.0, l: 0.0, c: 6.0 }; 168],
-				&Path::new("test-draw-lines-vaxis.png")
-			);
-	}
+		#[test]
+		fn render_draw_v_axis_lines() {
+			let _ = OHLCRenderOptions::new()
+				.v_axis(|va| va
+					.line_colour(0x000000FF)
+					.line_frequency(5.)
+				)
+				.render_and_save(
+					vec![OHLC { o: 2.0, h: 12.0, l: 0.0, c: 6.0 }; 168],
+					&Path::new("test-draw-lines-vaxis.png")
+				);
+		}
 
-	#[test]
-	fn render_up_down() {
-		let _ = OHLCRenderOptions::new()
-			.render_and_save(
-				vec![
-					OHLC { o: 1.0, h: 4.0, l: 0.0, c: 2.0 },
-					OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }
-				],
-				&Path::new("test-up-down.png")
-			);
-	}
+		#[test]
+		fn render_up_down() {
+			let _ = OHLCRenderOptions::new()
+				.render_and_save(
+					vec![
+						OHLC { o: 1.0, h: 4.0, l: 0.0, c: 2.0 },
+						OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }
+					],
+					&Path::new("test-up-down.png")
+				);
+		}
 
-	#[test]
-	fn render_temp_copy() {
-		let _ = OHLCRenderOptions::new()
-			.render(
-				vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 3],
-				|path| if let Err(err) = fs::copy(path, &Path::new("test-temp-copy.png")) {
-					Err(format!("File copy error: {:?}", err))
-				} else {
-					Ok(())
-				});
-	}
+		#[test]
+		fn render_temp_copy() {
+			let _ = OHLCRenderOptions::new()
+				.render(
+					vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 3],
+					|path| if let Err(err) = fs::copy(path, &Path::new("test-temp-copy.png")) {
+						Err(format!("File copy error: {:?}", err))
+					} else {
+						Ok(())
+					});
+		}
+	*/
 
 	// Technically not a test, it just generates the fonts array based on the fonts png.
 	#[test]
