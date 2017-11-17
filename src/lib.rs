@@ -148,7 +148,7 @@ impl OHLCRenderOptions {
 		let margin_top = 60u32;
 		let margin_bottom = 35u32;
 		let margin_left = 0u32;
-		let margin_right = 90u32;
+		let margin_right = 120u32;
 
 		let width = 1280;
 		let height = 720;
@@ -288,13 +288,21 @@ impl OHLCRenderOptions {
 			let chars_len = chars.len();
 
 			if do_border {
-				// TODO draw a box with the predetermined label colour
-				let add_or_sub = |d| if d > base_x { d + 1 } else { d - 1 };
-				for x_mag in 0..2 {
+				for x in (base_x - 1)..(base_x + 10 * chars_len as u32 + 1) {
 					for y_mag in 0..2 {
-						let x = (add_or_sub)(base_x + x_mag * 10 * chars_len as u32);
-						let y = (add_or_sub)(base_y + y_mag * 17);
+						let y = base_y + y_mag * 17 + y_mag * 2 - 1;
 
+						let mut chs = image_buffer
+							.get_pixel_mut(x, y)
+							.channels_mut();
+						for j in 0..4 {
+							chs[3 - j] = (colour >> (8 * j)) as u8;
+						}
+					}
+				}
+				for x_mag in 0..2 {
+					let x = base_x + x_mag * 10 * chars_len as u32 + x_mag * 2 - 1;
+					for y in (base_y - 1)..(base_y + 17 + 1) {
 						let mut chs = image_buffer
 							.get_pixel_mut(x, y)
 							.channels_mut();
