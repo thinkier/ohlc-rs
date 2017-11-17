@@ -152,6 +152,7 @@ impl OHLCRenderOptions {
 
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
 
+		// Filling the background here
 		if self.background_colour % 256 > 0 {
 			for x in 0..width {
 				for y in 0..height {
@@ -170,6 +171,7 @@ impl OHLCRenderOptions {
 
 		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
 
+		// Rendering the lines occur here
 		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
 			for y_es in 0..(height - (margin_top + margin_bottom)) {
 				if (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency) {
@@ -184,6 +186,7 @@ impl OHLCRenderOptions {
 					}
 				}
 
+				// Rendering text for the lines occur here
 				if self.v_axis_options.label_colour % 256 != 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
 					let base_y = y_es + margin_top + 9; // Top edge...
 
@@ -225,6 +228,7 @@ impl OHLCRenderOptions {
 			}
 		}
 
+		// The below section renders the OHLC candles
 		for (i, ohlc_elem) in data.iter().enumerate() {
 			let colour = if ohlc_elem.o > ohlc_elem.c { self.down_colour } else { self.up_colour };
 
@@ -237,6 +241,7 @@ impl OHLCRenderOptions {
 
 			let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as u32;
 
+			// Candles are rendered inside here
 			for y_state in if open_ys > close_ys { close_ys..(1 + open_ys) } else { open_ys..(1 + close_ys) } {
 				let y = height - y_state - margin_bottom;
 				// Introduce right padding if the candle isn't too short
@@ -250,6 +255,7 @@ impl OHLCRenderOptions {
 				}
 			}
 
+			// Sticks and rendered inside here
 			for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
 				let y = height - y_state - margin_bottom;
 
@@ -263,6 +269,7 @@ impl OHLCRenderOptions {
 				}
 			}
 
+			// Current value line is rendered inside here.
 			if i == data.len() - 1 {
 				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
 				for x in margin_left..(width - margin_right) {
@@ -289,6 +296,7 @@ impl OHLCRenderOptions {
 			}
 		}
 
+		// File save occurs here
 		match File::create(path) {
 			Ok(ref mut file) => match image::ImageRgba8(image_buffer).save(file, image::PNG) {
 				Ok(_) => Ok(()),
