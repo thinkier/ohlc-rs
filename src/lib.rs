@@ -36,10 +36,8 @@ pub struct OHLCRenderOptions {
 	/// Colour for the "current value" dot and line across the chart
 	pub(crate) current_value_colour: u32,
 	/// The prefix for the values represented in the OHLC
-	/// Currently ignored
 	pub(crate) value_prefix: String,
 	/// The suffix for the values represented in the OHLC
-	/// Currently ignored
 	pub(crate) value_suffix: String,
 	/// The amount of time, in seconds, each OHLC objects represent
 	/// Currently ignored
@@ -81,6 +79,13 @@ impl OHLCRenderOptions {
 		self.current_value_colour = current_val;
 		self.down_colour = down;
 		self.up_colour = up;
+
+		self
+	}
+
+	pub fn value_strings(mut self, prefix: &str, suffix: &str) -> Self {
+		self.value_prefix = prefix.to_string();
+		self.value_suffix = suffix.to_string();
 
 		self
 	}
@@ -193,7 +198,7 @@ impl OHLCRenderOptions {
 				if self.v_axis_options.label_colour % 256 != 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
 					let base_y = y_es + margin_top - 8; // Top edge...
 
-					let mut chars = format!("{}", ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency).into_bytes();
+					let mut chars = format!("{}{}{}", self.value_prefix, ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency, self.value_suffix).into_bytes();
 
 					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 						let _ = chars.pop();
@@ -271,7 +276,7 @@ impl OHLCRenderOptions {
 
 				// Add label to the closing value
 				{
-					let mut chars = format!("{}", ohlc_of_set.c).into_bytes();
+					let mut chars = format!("{}{}{}", self.value_prefix, ohlc_of_set.c, self.value_suffix).into_bytes();
 
 					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 						let _ = chars.pop();
@@ -429,12 +434,9 @@ mod tests {
 				label_frequency: 73.,
 			},
 			AxisOptions::new()
-				.title("I'm a meme")
-				.title_colour(69)
-				.line_colour(70)
-				.line_frequency(71.)
-				.label_colour(72)
-				.label_frequency(73.)
+				.title("I'm a meme", 69)
+				.line(70, 71.)
+				.label(72, 73.)
 		);
 	}
 
