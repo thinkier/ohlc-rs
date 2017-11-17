@@ -173,24 +173,53 @@ impl OHLCRenderOptions {
 		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
 			for y_es in 0..(height - (margin_top + margin_bottom)) {
 				if (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency) {
-					{
-						let y = y_es + margin_top;
-						for x in 0..(width - (margin_left + margin_right)) {
-							let mut chs = image_buffer
-								.get_pixel_mut(x, y)
-								.channels_mut();
-							for j in 0..4 {
-								chs[3 - j] = (self.v_axis_options.line_colour >> (8 * j)) as u8;
-							}
+					let y = y_es + margin_top;
+					for x in 0..(width - (margin_left + margin_right)) {
+						let mut chs = image_buffer
+							.get_pixel_mut(x, y)
+							.channels_mut();
+						for j in 0..4 {
+							chs[3 - j] = (self.v_axis_options.line_colour >> (8 * j)) as u8;
 						}
 					}
+				}
 
+				if self.v_axis_options.label_colour % 256 != 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
 					// TODO Use the y here as the anchor for inserting the labels
 					let base_y = y_es + margin_top + 9; // Top edge...
 
-					// 10 is character width; base_x is starting at the left edge
-					for base_x in 0..((margin_right as f32 / 10.).floor() as u32) {
+					// 10 is character width; f_x is starting at the left edge
+					let chars = format!("{}", ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency).into_bytes();
 
+					let n_chars = chars.len();
+					if n_chars > ((margin_right as f32 - 10.) / 10.).floor() as usize { continue }
+
+					for f_x in 0usize..n_chars {
+						let char_font: &[u8; 170] = &fonts::ASCII_TABLE[chars[(|d| if d < 127 { d } else { 0x20 })(f_x)] as usize];
+						for incr_y in 0usize..17 {
+							for incr_x in 0usize..10 {
+								let shade_at_pos = char_font[incr_x + incr_y * 10] as u32;
+
+								if shade_at_pos == 0 { continue }
+
+								let mut chs = image_buffer
+									.get_pixel_mut(width - margin_right + (f_x * 10 + incr_x) as u32 + 10u32, base_y + incr_y as u32 - 17u32)
+									.channels_mut();
+
+								// Don't modify the alpha channel
+								for j in 1..4 {
+									let bge = (self.background_colour >> (8 * j)) as u8;
+									let curr_col = (self.v_axis_options.label_colour >> (8 * j)) as u8;
+
+									chs[3 - j] = (
+										((shade_at_pos * curr_col as u32 +
+											((0xff - shade_at_pos) * bge as u32)
+										) as f64
+											/ 255.
+										).round()) as u8;
+								}
+							}
+						}
 					}
 				}
 			}
@@ -293,7 +322,7 @@ fn validate(data: &Vec<OHLC>) -> Result<(), &'static str> {
 mod tests {
 	extern crate serde_json;
 
-	use std::fs;
+	// use std::fs;
 	use std::io::{Read, Write};
 	use super::*;
 	use image::GenericImage;
@@ -349,6 +378,8 @@ mod tests {
 			.v_axis(|va| va
 				.line_colour(0x000000FF)
 				.line_frequency(200.)
+				.label_colour(0x0000FF)
+				.label_frequency(200.)
 			)
 			.render_and_save(
 				self::serde_json::from_str(&buf).unwrap(),
