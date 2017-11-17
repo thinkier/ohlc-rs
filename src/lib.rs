@@ -208,7 +208,7 @@ impl OHLCRenderOptions {
 					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 						let _ = chars.pop();
 					}
-					text_renders.push((chars, width - margin_right + 10u32, base_y, self.v_axis_options.label_colour, true))
+					text_renders.push((chars, width - margin_right + 10u32, base_y, self.v_axis_options.label_colour, false))
 				}
 			}
 		}
