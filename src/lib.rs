@@ -140,6 +140,9 @@ impl OHLCRenderOptions {
 			return Err(format!("Data validation error: {}", err));
 		}
 
+		// String.bytes, top edge x, leftmost edge y, colour
+		let mut text_renders: Vec<(Vec<u8>, u32, u32, u32)> = vec![];
+
 		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
 		let margin_top = 60u32;
@@ -188,41 +191,12 @@ impl OHLCRenderOptions {
 
 				// Rendering text for the lines occur here
 				if self.v_axis_options.label_colour % 256 != 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
-					let base_y = y_es + margin_top + 9; // Top edge...
+					let base_y = y_es + margin_top - 8; // Top edge...
 
 					let chars = format!("{}", ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency).into_bytes();
 
-					let n_chars = chars.len();
-					if n_chars > ((margin_right as f32 - 10.) / 10.).floor() as usize { continue }
-
-					// 10 is character width; f_x is starting at the left edge of the margin
-					for f_x in 0usize..n_chars {
-						let char_font: &[u8; 170] = &fonts::ASCII_TABLE[chars[(|d| if d < 127 { d } else { 0x20 })(f_x)] as usize];
-						for incr_y in 0usize..17 {
-							for incr_x in 0usize..10 {
-								let shade_at_pos = char_font[incr_x + incr_y * 10] as u32;
-
-								if shade_at_pos == 0 { continue }
-
-								let mut chs = image_buffer
-									// Translate right 10px and up 17px otherwise it'd look weird ass
-									.get_pixel_mut(width - margin_right + (f_x * 10 + incr_x) as u32 + 10u32, base_y + incr_y as u32 - 17u32)
-									.channels_mut();
-
-								// Don't modify the alpha channel
-								for j in 1..4 {
-									let bge = (self.background_colour >> (8 * j)) as u8;
-									let curr_col = (self.v_axis_options.label_colour >> (8 * j)) as u8;
-
-									chs[3 - j] = (
-										((shade_at_pos * curr_col as u32 +
-											((0xff - shade_at_pos) * bge as u32)
-										) as f64
-											/ 255.
-										).round()) as u8;
-								}
-							}
-						}
+					if chars.len() <= ((margin_right as f32 - 10.) / 10.).floor() as usize {
+						text_renders.push((chars, width - margin_right + 10u32, base_y, self.v_axis_options.label_colour))
 					}
 				}
 			}
@@ -290,6 +264,40 @@ impl OHLCRenderOptions {
 							.channels_mut();
 						for j in 0..4 {
 							chs[3 - j] = (self.current_value_colour >> (8 * j)) as u8;
+						}
+					}
+				}
+			}
+		}
+
+		// Text renderer section
+		for (chars, base_x, base_y, colour) in text_renders {
+			// 10 is character width; f_x is starting at the left edge of the margin
+			for f_x in 0usize..chars.len() {
+				let char_font: &[u8; 170] = &fonts::ASCII_TABLE[chars[(|d| if d < 127 { d } else { 0x20 })(f_x)] as usize];
+				for incr_y in 0usize..17 {
+					for incr_x in 0usize..10 {
+						let shade_at_pos = char_font[incr_x + incr_y * 10] as u32;
+
+						if shade_at_pos == 0 { continue }
+
+						let mut chs = image_buffer
+							// Translate right 10px and up 17px otherwise it'd look weird ass
+							.get_pixel_mut(base_x + (f_x * 10 + incr_x) as u32, base_y + incr_y as u32)
+							.channels_mut();
+
+						// Don't modify the alpha channel
+						for j in 1..4 {
+							let bge = (self.background_colour >> (8 * j)) as u8;
+							let curr_col = (colour >> (8 * j)) as u8;
+
+							chs[3 - j] = (
+								((shade_at_pos * curr_col as u32 +
+									// Add the existing background instead of doing alphas
+									((0xff - shade_at_pos) * bge as u32)
+								) as f64
+									/ 255.
+								).round()) as u8;
 						}
 					}
 				}
