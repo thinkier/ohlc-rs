@@ -26,9 +26,7 @@ use image::{ImageBuffer, Pixel};
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct OHLCRenderOptions {
 	/// Title of the chart
-	/// Currently ignored
 	pub(crate) title: String,
-	/// Currently ignored
 	/// Colour for the title of the chart
 	pub(crate) title_colour: u32,
 	/// Background colour of the entire chart
@@ -73,6 +71,13 @@ impl OHLCRenderOptions {
 			// Bright-ass green
 			up_colour: 0x00FF00FF,
 		}
+	}
+
+	pub fn title(mut self, title: &str, colour: u32) -> Self {
+		self.title = title.to_string();
+		self.title_colour = colour;
+
+		self
 	}
 
 	pub fn indicator_colours(mut self, current_val: u32, down: u32, up: u32) -> Self {
@@ -286,7 +291,7 @@ impl OHLCRenderOptions {
 			}
 		}
 
-		text_renders.push((self.title.clone().into_bytes(), 0, 0, self.title_colour, false));
+		text_renders.push((self.title.clone().into_bytes(), 8, 8, self.title_colour, false));
 
 		// Text renderer section
 		for (chars, base_x, base_y, colour, do_border) in text_renders {
@@ -445,6 +450,7 @@ mod tests {
 		let mut buf = String::new();
 		let _ = File::open("sample_data.json").unwrap().read_to_string(&mut buf);
 		let _ = OHLCRenderOptions::new()
+			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.v_axis(|va| va
 				.line(0x000000FF, 200.)
 				.label(0x000000FF, 200.)
