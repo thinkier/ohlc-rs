@@ -186,9 +186,11 @@ impl OHLCRenderOptions {
 					}
 
 					// TODO Use the y here as the anchor for inserting the labels
+					let base_y = y_es + margin_top + 9; // Top edge...
+
 					// 10 is character width; base_x is starting at the left edge
 					for base_x in 0..((margin_right as f32 / 10.).floor() as u32) {
-						let base_y = y_es + margin_top + 9; // Top edge...
+
 					}
 				}
 			}
