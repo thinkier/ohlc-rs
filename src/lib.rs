@@ -185,15 +185,14 @@ impl OHLCRenderOptions {
 				}
 
 				if self.v_axis_options.label_colour % 256 != 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
-					// TODO Use the y here as the anchor for inserting the labels
 					let base_y = y_es + margin_top + 9; // Top edge...
 
-					// 10 is character width; f_x is starting at the left edge
 					let chars = format!("{}", ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency).into_bytes();
 
 					let n_chars = chars.len();
 					if n_chars > ((margin_right as f32 - 10.) / 10.).floor() as usize { continue }
 
+					// 10 is character width; f_x is starting at the left edge of the margin
 					for f_x in 0usize..n_chars {
 						let char_font: &[u8; 170] = &fonts::ASCII_TABLE[chars[(|d| if d < 127 { d } else { 0x20 })(f_x)] as usize];
 						for incr_y in 0usize..17 {
@@ -203,6 +202,7 @@ impl OHLCRenderOptions {
 								if shade_at_pos == 0 { continue }
 
 								let mut chs = image_buffer
+									// Translate right 10px and up 17px otherwise it'd look weird ass
 									.get_pixel_mut(width - margin_right + (f_x * 10 + incr_x) as u32 + 10u32, base_y + incr_y as u32 - 17u32)
 									.channels_mut();
 
