@@ -430,7 +430,7 @@ mod tests {
 						let x = (base_x * 20) + 10 + ptr_x;
 						let y = (base_y * 18) + ptr_y;
 
-						output += &format!("{},", 255 - img.get_pixel(x, y).data[0]);
+						output += &format!("{},{}", 255 - img.get_pixel(x, y).data[0], if ptr_x != 9 { " " } else { "" });
 					}
 					output += "\n";
 				}
