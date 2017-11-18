@@ -24,15 +24,32 @@ pub fn calculate_ohlc_of_set(data: &Vec<OHLC>) -> OHLC {
 	ohlc
 }
 
-pub fn duration_string(elapsed : u64) -> String {
+pub fn duration_string(elapsed: u64) -> String {
 	if elapsed < 10 {
 		return "Now".to_string();
 	}
 
-	let (secs, mins, hours, days) = (elapsed % 60, (elapsed % 3600) / 60, (elapsed % 86400) / 3600, elapsed / 86400);
+	let (secs, mins, hours, days, weeks, months, years) = (
+		elapsed % 60,
+		(elapsed % 3600) / 60,
+		(elapsed % 86400) / 3600,
+		(elapsed % 604800) / 86400,
+		(elapsed % 2592000) / 604800,
+		(elapsed % 31557600) / 2592000,
+		elapsed / 31557600,
+	);
 
 	let mut elapsed_str = String::new();
 
+	if years > 0 {
+		elapsed_str += &format!("{}y", years);
+	}
+	if months > 0 {
+		elapsed_str += &format!("{}m", months);
+	}
+	if weeeks > 0 {
+		elapsed_str += &format!("{}d", weeks);
+	}
 	if days > 0 {
 		elapsed_str += &format!("{}d", days);
 	}
