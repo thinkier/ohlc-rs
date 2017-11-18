@@ -160,8 +160,8 @@ impl OHLCRenderOptions {
 		let margin_left = 10u32;
 		let margin_right = 105u32;
 
-		let width = 980;
-		let height = 590;
+		let width = 1150;
+		let height = 600;
 
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
 
@@ -245,7 +245,7 @@ impl OHLCRenderOptions {
 					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 						let _ = chars.pop();
 					}
-					text_renders.push((chars, x - 10, height - margin_bottom + 3, self.h_axis_options.label_colour, false))
+					text_renders.push((chars, x - 10, height - margin_bottom + 5, self.h_axis_options.label_colour, false))
 				}
 			}
 		}
@@ -278,7 +278,7 @@ impl OHLCRenderOptions {
 			}
 
 			// Sticks and rendered inside here
-			for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
+			for y_state in (((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as u32)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
 				let y = height - y_state - margin_bottom;
 
 				for x in (x_center - stick_width - 1) as u32..(x_center + stick_width - 1) as u32 {
@@ -291,18 +291,9 @@ impl OHLCRenderOptions {
 				}
 			}
 
-			// Current value line is rendered inside here.
+			// Render the star for the current price line
 			if i == data.len() - 1 {
 				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
-				for half_x in (margin_left / 2)..((width - margin_right) / 2) {
-					let mut chs = image_buffer
-						.get_pixel_mut(half_x * 2, y)
-						.channels_mut();
-					for j in 0..4 {
-						chs[3 - j] = (self.current_value_colour >> (8 * j)) as u8;
-					}
-				}
-
 				for x_offset in -2i32..3 {
 					for y_offset in -2i32..3 {
 						if !(x_offset == y_offset || x_offset + y_offset == 0 || x_offset == 0) { continue }
@@ -315,19 +306,33 @@ impl OHLCRenderOptions {
 						}
 					}
 				}
-
-				// Add label to the closing value
-				{
-					let mut chars = format!("{}{}{}", self.value_prefix, ohlc_of_set.c, self.value_suffix).into_bytes();
-
-					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
-						let _ = chars.pop();
-					}
-					text_renders.push((chars, width - margin_right + 10u32, y - 8, self.current_value_colour, true))
-				}
 			}
 		}
 
+		// Current, lowest, highest value line is rendered inside here.
+		for (val, colour) in vec![(ohlc_of_set.l, self.down_colour), (ohlc_of_set.h, self.up_colour), (ohlc_of_set.c, self.current_value_colour)] {
+			let y = height - (((val - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
+			for half_x in (margin_left / 2)..((width - margin_right) / 2) {
+				let mut chs = image_buffer
+					.get_pixel_mut(half_x * 2, y)
+					.channels_mut();
+				for j in 0..4 {
+					chs[3 - j] = (colour >> (8 * j)) as u8;
+				}
+			}
+
+			// Add label
+			{
+				let mut chars = format!("{}{}{}", self.value_prefix, val, self.value_suffix).into_bytes();
+
+				while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
+					let _ = chars.pop();
+				}
+				text_renders.push((chars, width - margin_right + 10u32, y - 8, colour, true))
+			}
+		}
+
+		// Add title text
 		text_renders.push((self.title.clone().into_bytes(), 8, 8, self.title_colour, false));
 
 		// Text renderer section
