@@ -23,4 +23,4 @@ fn main(){
 * `p` is a reference to a path
 * `|...| {...}` the callback function which you can code in. **Note:** *The image located at the path is destroyed once the callback function exits, so don't do anything async with the path.*
 
-**Note:** Sample data in sample_data.json is 7d bitcoin price from 1510221600 to 1510826400.
+**Note:** Sample data in sample_data.json is 7d bitcoin price.
