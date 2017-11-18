@@ -157,7 +157,7 @@ impl OHLCRenderOptions {
 
 		let margin_top = 60u32;
 		let margin_bottom = 35u32;
-		let margin_left = 0u32;
+		let margin_left = 10u32;
 		let margin_right = 105u32;
 
 		let width = 780;
@@ -184,12 +184,12 @@ impl OHLCRenderOptions {
 
 		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
 
-		// Rendering the lines occur here
+		// Rendering the horizontal (price) lines occur here
 		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
 			for y_es in 0..(height - (margin_top + margin_bottom)) {
 				if (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency) {
 					let y = y_es + margin_top;
-					for x in 0..(width - (margin_left + margin_right)) {
+					for x in margin_left..(width - margin_right) {
 						let mut chs = image_buffer
 							.get_pixel_mut(x, y)
 							.channels_mut();
@@ -200,7 +200,7 @@ impl OHLCRenderOptions {
 				}
 
 				// Rendering text for the lines occur here
-				if self.v_axis_options.label_colour % 256 != 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
+				if self.v_axis_options.label_colour % 256 > 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
 					let base_y = y_es + margin_top - 8; // Top edge...
 
 					let mut chars = format!("{}{}{}", self.value_prefix, (((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency * 1e6).round() / 1e6, self.value_suffix).into_bytes();
@@ -213,13 +213,44 @@ impl OHLCRenderOptions {
 			}
 		}
 
+		// Rendering the vertical (time) lines occur here
+		if self.h_axis_options.line_colour % 256 > 0 && self.h_axis_options.line_frequency > 0. {
+			let data_len = data.len() as u64;
+
+			let line_count = (data_len as f64 / self.h_axis_options.line_frequency).round() as u32 + 1;
+			let interval = (candle_width * self.h_axis_options.line_frequency).round() as u32;
+
+			for x_idx in 0..line_count {
+				let x = x_idx * interval + margin_left;
+
+				for y in margin_top..(height - margin_bottom) {
+					let mut chs = image_buffer
+						.get_pixel_mut(x, y)
+						.channels_mut();
+					for j in 0..4 {
+						chs[3 - j] = (self.h_axis_options.line_colour >> (8 * j)) as u8;
+					}
+				}
+
+				// Rendering text for the lines occur here
+				if self.h_axis_options.label_colour % 256 > 0 && self.h_axis_options.label_frequency > 0. {
+					let mut chars = duration_string((self.time_units as f64 * self.h_axis_options.line_frequency * (line_count - x_idx - 1) as f64).round() as u64).into_bytes();
+
+					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
+						let _ = chars.pop();
+					}
+					text_renders.push((chars, x - 10, height - margin_bottom + 3, self.h_axis_options.label_colour, false))
+				}
+			}
+		}
+
 		// The below section renders the OHLC candles
 		for (i, ohlc_elem) in data.iter().enumerate() {
 			let colour = if ohlc_elem.o > ohlc_elem.c { self.down_colour } else { self.up_colour };
 
 			// Yes, no left margin
-			let begin_pos = (candle_width * i as f64) as u32;
-			let end_pos = (candle_width * (i + 1) as f64) as u32;
+			let begin_pos = (candle_width * i as f64) as u32 + margin_left;
+			let end_pos = (candle_width * (i + 1) as f64) as u32 + margin_left;
 
 			let open_ys = ((ohlc_elem.o - ohlc_of_set.l) / y_val_increment).round() as u32;
 			let close_ys = ((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as u32;
@@ -453,6 +484,10 @@ mod tests {
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.v_axis(|va| va
 				.line(0x000000FF, 200.)
+				.label(0x000000FF, 200.)
+			)
+			.h_axis(|va| va
+				.line(0x000000FF, 24.)
 				.label(0x000000FF, 200.)
 			)
 			.value_strings("$", "")
