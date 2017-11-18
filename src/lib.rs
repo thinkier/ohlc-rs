@@ -218,10 +218,12 @@ impl OHLCRenderOptions {
 			let data_len = data.len() as u64;
 
 			let line_count = (data_len as f64 / self.h_axis_options.line_frequency).round() as u32 + 1;
-			let interval = (candle_width * self.h_axis_options.line_frequency).round() as u32;
+			let line_interval = (candle_width * self.h_axis_options.line_frequency).round() as u32;
+			let label_count = (data_len as f64 / self.h_axis_options.label_frequency).round() as u32 + 1;
+			let label_interval = (candle_width * self.h_axis_options.label_frequency).round() as u32;
 
 			for x_idx in 0..line_count {
-				let x = x_idx * interval + margin_left;
+				let x = x_idx * line_interval + margin_left;
 
 				for y in margin_top..(height - margin_bottom) {
 					let mut chs = image_buffer
@@ -231,10 +233,14 @@ impl OHLCRenderOptions {
 						chs[3 - j] = (self.h_axis_options.line_colour >> (8 * j)) as u8;
 					}
 				}
+			}
 
-				// Rendering text for the lines occur here
+			// Rendering text for the lines occur here
+			for x_idx in 0..label_count {
+				let x = x_idx * label_interval + margin_left;
+
 				if self.h_axis_options.label_colour % 256 > 0 && self.h_axis_options.label_frequency > 0. {
-					let mut chars = duration_string((self.time_units as f64 * self.h_axis_options.line_frequency * (line_count - x_idx - 1) as f64).round() as u64).into_bytes();
+					let mut chars = duration_string((self.time_units as f64 * self.h_axis_options.label_frequency * (label_count - x_idx - 1) as f64).round() as u64).into_bytes();
 
 					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 						let _ = chars.pop();
@@ -488,7 +494,7 @@ mod tests {
 			)
 			.h_axis(|va| va
 				.line(0x000000FF, 24.)
-				.label(0x000000FF, 200.)
+				.label(0x000000FF, 24.)
 			)
 			.value_strings("$", "")
 			.render_and_save(
