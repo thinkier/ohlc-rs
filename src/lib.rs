@@ -160,8 +160,8 @@ impl OHLCRenderOptions {
 		let margin_left = 10u32;
 		let margin_right = 105u32;
 
-		let width = 1150;
-		let height = 600;
+		let width = 1300;
+		let height = 650;
 
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
 
@@ -386,7 +386,6 @@ impl OHLCRenderOptions {
 						}
 
 						let mut chs = image_buffer
-							// Translate right 10px and up 17px otherwise it'd look weird ass
 							.get_pixel_mut(x, y)
 							.channels_mut();
 
