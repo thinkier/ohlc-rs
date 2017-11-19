@@ -59,7 +59,7 @@ impl OHLCRenderOptions {
 			title_colour: 0,
 			background_colour: 0xDDDDDDFF,
 			// Bright-ass blue
-			current_value_colour: 0x0000FFFF,
+			current_value_colour: 0x2E44EAFF,
 			value_prefix: String::new(),
 			value_suffix: String::new(),
 			// Default is 1 hour
@@ -67,9 +67,9 @@ impl OHLCRenderOptions {
 			h_axis_options: AxisOptions::new(),
 			v_axis_options: AxisOptions::new(),
 			// Bright-ass red
-			down_colour: 0xFF0000FF,
+			down_colour: 0xD33040FF,
 			// Bright-ass green
-			up_colour: 0x00FF00FF,
+			up_colour: 0x27A819FF,
 		}
 	}
 
@@ -493,12 +493,12 @@ mod tests {
 		let _ = OHLCRenderOptions::new()
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.v_axis(|va| va
-				.line(0x000000FF, 200.)
-				.label(0x000000FF, 200.)
+				.line(0xCCCCCCFF, 200.)
+				.label(0x222222FF, 200.)
 			)
 			.h_axis(|va| va
-				.line(0x000000FF, 24.)
-				.label(0x000000FF, 24.)
+				.line(0xD2D2D2D2FF, 24.)
+				.label(0x222222FF, 24.)
 			)
 			.value_strings("$", "")
 			.render_and_save(
