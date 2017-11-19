@@ -494,7 +494,7 @@ mod tests {
 				.label(0x222222FF, 200.)
 			)
 			.h_axis(|va| va
-				.line(0xD2D2D2D2FF, 24.)
+				.line(0xD2D2D2FF, 24.)
 				.label(0x222222FF, 24.)
 			)
 			.value_strings("$", "")
