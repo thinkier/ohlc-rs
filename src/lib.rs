@@ -58,7 +58,6 @@ impl OHLCRenderOptions {
 			title: String::new(),
 			title_colour: 0,
 			background_colour: 0xDDDDDDFF,
-			// Bright-ass blue
 			current_value_colour: 0x2E44EAFF,
 			value_prefix: String::new(),
 			value_suffix: String::new(),
@@ -66,9 +65,7 @@ impl OHLCRenderOptions {
 			time_units: 3600,
 			h_axis_options: AxisOptions::new(),
 			v_axis_options: AxisOptions::new(),
-			// Bright-ass red
 			down_colour: 0xD33040FF,
-			// Bright-ass green
 			up_colour: 0x27A819FF,
 		}
 	}
