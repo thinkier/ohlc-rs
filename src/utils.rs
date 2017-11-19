@@ -47,7 +47,7 @@ pub fn duration_string(elapsed: u64) -> String {
 	if months > 0 {
 		elapsed_str += &format!("{}m", months);
 	}
-	if weeeks > 0 {
+	if weeks > 0 {
 		elapsed_str += &format!("{}d", weeks);
 	}
 	if days > 0 {
