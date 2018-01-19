@@ -177,9 +177,12 @@ impl OHLCRenderOptions {
 			}
 		}
 
+		// Width of the "candle" in the candlestick chart
 		let candle_width = ((width - (margin_left + margin_right)) as f64 / data.len() as f64).floor();
+		// Width of the "stick" component in the candlestick chart
 		let stick_width = (|x| if x < 1 || candle_width <= 5. { 1 } else { x })((candle_width / 10. + 0.3).round() as u32);
 
+		// Defines how much the Y value should increment for every unit of the OHLC supplied
 		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
 
 		// Rendering the horizontal (price) lines occur here
