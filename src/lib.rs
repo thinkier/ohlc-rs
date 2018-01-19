@@ -169,14 +169,10 @@ impl OHLCRenderOptions {
 
 		// Filling the background here
 		if self.background_colour % 256 > 0 {
-			for x in 0..width {
-				for y in 0..height {
-					let mut chs = image_buffer
-						.get_pixel_mut(x, y)
-						.channels_mut();
-					for j in 0..4 {
-						chs[3 - j] = (self.background_colour >> (8 * j)) as u8;
-					}
+			for pix in image_buffer.pixels_mut() {
+				let chs = pix.channels_mut();
+				for j in 0..4 {
+					chs[3 - j] = (self.background_colour >> (8 * j)) as u8;
 				}
 			}
 		}
