@@ -1,4 +1,6 @@
 #[macro_use]
+extern crate log;
+#[macro_use]
 extern crate serde_derive;
 extern crate image;
 extern crate tempdir;
@@ -17,6 +19,7 @@ pub use utils::*;
 
 use std::collections::hash_map::DefaultHasher;
 use std::fs::File;
+use std::time::SystemTime;
 use std::hash::{Hash, Hasher};
 use std::path::*;
 
@@ -143,6 +146,8 @@ impl OHLCRenderOptions {
 	///
 	/// Returns an error string if an error occurs
 	pub fn render_and_save(&self, data: Vec<OHLC>, path: &Path) -> Result<(), String> {
+		let start_time = SystemTime::now();
+
 		if let Err(err) = validate(&data) {
 			return Err(format!("Data validation error: {}", err));
 		}
@@ -404,6 +409,7 @@ impl OHLCRenderOptions {
 			}
 		}
 
+		debug!("Rendering process took {:?}", start_time.elapsed());
 		// File save occurs here
 		match File::create(path) {
 			Ok(ref mut file) => match image::ImageRgba8(image_buffer).save(file, image::PNG) {
@@ -500,7 +506,7 @@ mod tests {
 			.value_strings("$", "")
 			.render_and_save(
 				self::serde_json::from_str(&buf).unwrap(),
-				&Path::new("test-draw-sample-data.png")
+				&Path::new("test-draw-sample-data.png"),
 			);
 	}
 
