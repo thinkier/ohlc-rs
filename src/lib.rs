@@ -275,7 +275,7 @@ impl OHLCRenderOptions {
 			}
 
 			// Sticks and rendered inside here
-			for y_state in (((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as u32)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
+			for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
 				let y = height - y_state - margin_bottom;
 
 				for x in (x_center - stick_width - 1) as u32..(x_center + stick_width - 1) as u32 {
