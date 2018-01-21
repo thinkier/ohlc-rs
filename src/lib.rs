@@ -159,10 +159,10 @@ impl OHLCRenderOptions {
 
 		let margin_top = 60u32;
 		let margin_bottom = 35u32;
-		let margin_left = 10u32;
-		let margin_right = 105u32;
+		let margin_left = 12u32;
+		let margin_right = 113u32;
 
-		let width = 1300;
+		let width = 1310;
 		let height = 650;
 
 		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
