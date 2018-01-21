@@ -204,7 +204,7 @@ impl OHLCRenderOptions {
 				if self.v_axis_options.label_colour % 256 > 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
 					let base_y = y_es + margin_top - 8; // Top edge...
 
-					let mut chars = format!("{}{}{}", self.value_prefix, (((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency * 1e6).round() / 1e6, self.value_suffix).into_bytes();
+					let mut chars = format!("{}{:.8}{}", self.value_prefix, ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency, self.value_suffix).into_bytes();
 
 					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 						let _ = chars.pop();
@@ -324,7 +324,7 @@ impl OHLCRenderOptions {
 
 			// Add label
 			{
-				let mut chars = format!("{}{}{}", self.value_prefix, val, self.value_suffix).into_bytes();
+				let mut chars = format!("{}{:.8}{}", self.value_prefix, val, self.value_suffix).into_bytes();
 
 				while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 					let _ = chars.pop();
