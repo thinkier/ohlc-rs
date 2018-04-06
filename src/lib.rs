@@ -385,11 +385,12 @@ impl OHLCRenderOptions {
 						// Don't modify the alpha channel
 						for j in 0..3 {
 							let curr_col = (colour >> (24 - 8 * j)) as u8;
+							let bgc = self.background_colour >> (24 - 8 * j);
 
 							image_buffer[(x + y * width) * 3 + j] = (
 								((shade_at_pos * curr_col as usize +
 									// Add the existing background instead of doing alphas
-									((0xff - shade_at_pos) * self.background_colour as usize)
+									((0xff - shade_at_pos) * bgc as usize)
 								) as f64
 									/ 255.
 								).round()) as u8;
