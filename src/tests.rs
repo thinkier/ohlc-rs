@@ -4,7 +4,7 @@ extern crate serde_json;
 use image::GenericImage;
 use std::fs::File;
 // use std::fs;
-use std::io::{Read, Write};
+use std::io::Write;
 use super::*;
 
 #[test]
@@ -44,34 +44,6 @@ fn axis_options_modification() {
 			.title("I'm a meme", 69)
 			.line(70, 71.)
 			.label(72, 73.)
-	);
-}
-
-#[test]
-fn render_draw_sample_data() {
-	env_logger::init();
-
-	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
-	let options = OHLCRenderOptions::new()
-		.title("BTCUSD | ohlc-rs", 0x007F7FFF)
-		.v_axis(|va| va
-			.line(0xCCCCCCFF, 200.)
-			.label(0x222222FF, 200.)
-		)
-		.h_axis(|va| va
-			.line(0xD2D2D2FF, 24.)
-			.label(0x222222FF, 24.)
-		)
-		.background_colour(0x36393EFF)
-		.value_strings("$", "");
-
-	options.render_and_save(
-		data.clone(),
-		&Path::new("test-draw-sample-data.png"),
-	);
-	options.render_and_save(
-		data,
-		&Path::new("test-draw-sample-data.bmp"),
 	);
 }
 
@@ -165,4 +137,32 @@ fn generate_fonts_file() {
 
 	let mut f = File::create("src/fonts.rs").unwrap();
 	let _ = f.write(output.as_bytes());
+}
+
+#[test]
+fn render_draw_sample_data() {
+	env_logger::init();
+
+	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
+	let options = OHLCRenderOptions::new()
+		.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+		.v_axis(|va| va
+			.line(0xCCCCCCFF, 200.)
+			.label(0x222222FF, 200.)
+		)
+		.h_axis(|va| va
+			.line(0xD2D2D2FF, 24.)
+			.label(0x222222FF, 24.)
+		)
+		.background_colour(0x36393EFF)
+		.value_strings("$", "");
+
+	let _ = options.render_and_save(
+		data.clone(),
+		&Path::new("test-draw-sample-data.png"),
+	);
+	let _ = options.render_and_save(
+		data,
+		&Path::new("test-draw-sample-data.bmp"),
+	);
 }
