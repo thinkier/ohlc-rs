@@ -62,7 +62,7 @@ fn render_draw_sample_data() {
 			.line(0xD2D2D2FF, 24.)
 			.label(0x222222FF, 24.)
 		)
-		.background_colour(0x36393E)
+		.background_colour(0x36393EFF)
 		.value_strings("$", "");
 
 	options.render_and_save(
