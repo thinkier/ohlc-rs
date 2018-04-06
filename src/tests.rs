@@ -1,6 +1,7 @@
 extern crate serde_json;
 
 use image::GenericImage;
+use std::fs::File;
 // use std::fs;
 use std::io::{Read, Write};
 use super::*;
@@ -23,7 +24,7 @@ fn render_options_modification() {
 		},
 		OHLCRenderOptions::new()
 			.indicator_colours(0x69696968, 0x69696969, 0x69696970)
-			.background_tint(0xFEFEFEFE)
+			.background_tint(0xFE)
 	);
 }
 
@@ -135,7 +136,7 @@ fn generate_fonts_file() {
 
 	for base_y in 2..8 {
 		for base_x in 0..16 {
-			if (base_y == 7 && base_x == 15) || (base_y == 2 && base_x == 0) { continue }
+			if (base_y == 7 && base_x == 15) || (base_y == 2 && base_x == 0) { continue; }
 			output += "\t[\n";
 			// Write character into array.
 			for ptr_y in 0..17 {

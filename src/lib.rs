@@ -7,10 +7,8 @@ extern crate tempdir;
 
 
 pub use data::*;
-use image::{ImageBuffer, Pixel};
 pub use options::*;
 use std::collections::hash_map::DefaultHasher;
-use std::fs::File;
 use std::hash::{Hash, Hasher};
 use std::path::*;
 use std::time::SystemTime;
@@ -152,14 +150,14 @@ impl OHLCRenderOptions {
 		}
 
 		// String.bytes, top edge x, leftmost edge y, colour, do a border
-		let mut text_renders: Vec<(Vec<u8>, u32, u32, u32, bool)> = vec![];
+		let mut text_renders: Vec<(Vec<u8>, usize, usize, u32, bool)> = vec![];
 
 		let ohlc_of_set = calculate_ohlc_of_set(&data);
 
-		let margin_top = 60u32;
-		let margin_bottom = 35u32;
-		let margin_left = 12u32;
-		let margin_right = 113u32;
+		let margin_top = 60;
+		let margin_bottom = 35;
+		let margin_left = 12;
+		let margin_right = 113;
 
 		let width = 1310;
 		let height = 650;
@@ -169,7 +167,7 @@ impl OHLCRenderOptions {
 		// Width of the "candle" in the candlestick chart
 		let candle_width = ((width - (margin_left + margin_right)) as f64 / data.len() as f64).floor();
 		// Width of the "stick" component in the candlestick chart
-		let stick_width = (|x| if x < 1 || candle_width <= 5. { 1 } else { x })((candle_width / 10. + 0.3).round() as u32);
+		let stick_width = (|x| if x < 1 || candle_width <= 5. { 1 } else { x })((candle_width / 10. + 0.3).round() as usize);
 
 		// Defines how much the Y value should increment for every unit of the OHLC supplied
 		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
@@ -180,12 +178,7 @@ impl OHLCRenderOptions {
 				if (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency) {
 					let y = y_es + margin_top;
 					for x in margin_left..(width - margin_right) {
-						let mut chs = image_buffer
-							.get_pixel_mut(x, y)
-							.channels_mut();
-						for j in 0..4 {
-							chs[3 - j] = (self.v_axis_options.line_colour >> (8 * j)) as u8;
-						}
+						colour_rgb(&mut image_buffer, width, x, y, self.v_axis_options.line_colour);
 					}
 				}
 
@@ -198,30 +191,25 @@ impl OHLCRenderOptions {
 					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 						let _ = chars.pop();
 					}
-					text_renders.push((chars, width - margin_right + 10u32, base_y, self.v_axis_options.label_colour, false))
+					text_renders.push((chars, width - margin_right + 10, base_y, self.v_axis_options.label_colour, false))
 				}
 			}
 		}
 
 		// Rendering the vertical (time) lines occur here
 		if self.h_axis_options.line_colour % 256 > 0 && self.h_axis_options.line_frequency > 0. {
-			let data_len = data.len() as u64;
+			let data_len = data.len();
 
-			let line_count = (data_len as f64 / self.h_axis_options.line_frequency).round() as u32 + 1;
-			let line_interval = (candle_width * self.h_axis_options.line_frequency).round() as u32;
-			let label_count = (data_len as f64 / self.h_axis_options.label_frequency).round() as u32 + 1;
-			let label_interval = (candle_width * self.h_axis_options.label_frequency).round() as u32;
+			let line_count = (data_len as f64 / self.h_axis_options.line_frequency).round() as usize + 1;
+			let line_interval = (candle_width * self.h_axis_options.line_frequency).round() as usize;
+			let label_count = (data_len as f64 / self.h_axis_options.label_frequency).round() as usize + 1;
+			let label_interval = (candle_width * self.h_axis_options.label_frequency).round() as usize;
 
 			for x_idx in 0..line_count {
 				let x = x_idx * line_interval + margin_left;
 
 				for y in margin_top..(height - margin_bottom) {
-					let mut chs = image_buffer
-						.get_pixel_mut(x, y)
-						.channels_mut();
-					for j in 0..4 {
-						chs[3 - j] = (self.h_axis_options.line_colour >> (8 * j)) as u8;
-					}
+					colour_rgb(&mut image_buffer, width, x, y, self.h_axis_options.line_colour);
 				}
 			}
 
@@ -245,55 +233,40 @@ impl OHLCRenderOptions {
 			let colour = if ohlc_elem.o > ohlc_elem.c { self.down_colour } else { self.up_colour };
 
 			// Yes, no left margin
-			let begin_pos = (candle_width * i as f64) as u32 + margin_left;
-			let end_pos = (candle_width * (i + 1) as f64) as u32 + margin_left;
+			let begin_pos = (candle_width * i as f64) as usize + margin_left;
+			let end_pos = (candle_width * (i + 1) as f64) as usize + margin_left;
 
-			let open_ys = ((ohlc_elem.o - ohlc_of_set.l) / y_val_increment).round() as u32;
-			let close_ys = ((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as u32;
+			let open_ys = ((ohlc_elem.o - ohlc_of_set.l) / y_val_increment).round() as usize;
+			let close_ys = ((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as usize;
 
-			let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as u32;
+			let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as usize;
 
 			// Candles are rendered inside here
 			for y_state in if open_ys > close_ys { close_ys..(1 + open_ys) } else { open_ys..(1 + close_ys) } {
 				let y = height - y_state - margin_bottom;
 				// Introduce right padding if the candle isn't too short
 				for x in begin_pos..(if end_pos - begin_pos > 3 { end_pos - 1 } else { end_pos + 1 }) {
-					let mut chs = image_buffer
-						.get_pixel_mut(x, y)
-						.channels_mut();
-					for j in 0..4 {
-						chs[3 - j] = (colour >> (8 * j)) as u8;
-					}
+					colour_rgb(&mut image_buffer, width, x, y, colour);
 				}
 			}
 
 			// Sticks and rendered inside here
-			for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as u32)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as u32) {
+			for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as usize)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as usize) {
 				let y = height - y_state - margin_bottom;
 
-				for x in (x_center - stick_width - 1) as u32..(x_center + stick_width - 1) as u32 {
-					let mut chs = image_buffer
-						.get_pixel_mut(x, y)
-						.channels_mut();
-					for j in 0..4 {
-						chs[3 - j] = (colour >> (8 * j)) as u8;
-					}
+				for x in (x_center - stick_width - 1) as usize..(x_center + stick_width - 1) as usize {
+					colour_rgb(&mut image_buffer, width, x, y, colour);
 				}
 			}
 
 			// Render the star for the current price line
 			if i == data.len() - 1 {
-				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
+				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as usize) - margin_bottom;
 				for x_offset in -2i32..3 {
 					for y_offset in -2i32..3 {
 						if !(x_offset == y_offset || x_offset + y_offset == 0 || x_offset == 0) { continue; }
 
-						let mut chs = image_buffer
-							.get_pixel_mut((x_offset + (x_center as i32)) as u32, (y_offset + (y as i32)) as u32)
-							.channels_mut();
-						for j in 0..4 {
-							chs[3 - j] = (self.current_value_colour >> (8 * j)) as u8;
-						}
+						colour_rgb(&mut image_buffer, width, (x_offset + (x_center as i32)) as usize, (y_offset + (y as i32)) as usize, self.current_value_colour);
 					}
 				}
 			}
@@ -301,14 +274,9 @@ impl OHLCRenderOptions {
 
 		// Current, lowest, highest value line is rendered inside here.
 		for (val, colour) in vec![(ohlc_of_set.l, self.down_colour), (ohlc_of_set.h, self.up_colour), (ohlc_of_set.c, self.current_value_colour)] {
-			let y = height - (((val - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
+			let y = height - (((val - ohlc_of_set.l) / y_val_increment).round() as usize) - margin_bottom;
 			for half_x in (margin_left / 2)..((width - margin_right) / 2) {
-				let mut chs = image_buffer
-					.get_pixel_mut(half_x * 2, y)
-					.channels_mut();
-				for j in 0..4 {
-					chs[3 - j] = (colour >> (8 * j)) as u8;
-				}
+				colour_rgb(&mut image_buffer, width, half_x * 2, y, colour);
 			}
 
 			// Add label
@@ -318,7 +286,7 @@ impl OHLCRenderOptions {
 				while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
 					let _ = chars.pop();
 				}
-				text_renders.push((chars, width - margin_right + 10u32, y - 8, colour, true))
+				text_renders.push((chars, width - margin_right + 10, y - 8, colour, true))
 			}
 		}
 
@@ -330,27 +298,17 @@ impl OHLCRenderOptions {
 			let chars_len = chars.len();
 
 			if do_border {
-				for x in (base_x - 1)..(base_x + 10 * chars_len as u32 + 1) {
+				for x in (base_x - 1)..(base_x + 10 * chars_len as usize + 1) {
 					for y_mag in 0..2 {
 						let y = base_y + y_mag * 17 + y_mag * 1 - 1;
 
-						let mut chs = image_buffer
-							.get_pixel_mut(x, y)
-							.channels_mut();
-						for j in 0..4 {
-							chs[3 - j] = (colour >> (8 * j)) as u8;
-						}
+						colour_rgb(&mut image_buffer, width, x, y, colour);
 					}
 				}
 				for x_mag in 0..2 {
-					let x = base_x + x_mag * 10 * chars_len as u32 + x_mag * 2 - 1;
+					let x = base_x + x_mag * 10 * chars_len as usize + x_mag * 2 - 1;
 					for y in (base_y - 1)..(base_y + 17 + 1) {
-						let mut chs = image_buffer
-							.get_pixel_mut(x, y)
-							.channels_mut();
-						for j in 0..4 {
-							chs[3 - j] = (colour >> (8 * j)) as u8;
-						}
+						colour_rgb(&mut image_buffer, width, x, y, colour);
 					}
 				}
 			}
@@ -360,34 +318,24 @@ impl OHLCRenderOptions {
 				let char_font: &[u8; 170] = &fonts::ASCII_TABLE[chars[(|d| if d < 127 { d } else { 0x20 })(f_x)] as usize];
 				for incr_y in 0usize..17 {
 					for incr_x in 0usize..10 {
-						let x = base_x + (incr_x + f_x * 10) as u32;
-						let y = base_y + incr_y as u32;
+						let x = base_x + (incr_x + f_x * 10) as usize;
+						let y = base_y + incr_y as usize;
 
-						let shade_at_pos = char_font[incr_x + incr_y * 10] as u32;
+						let shade_at_pos = char_font[incr_x + incr_y * 10] as usize;
 
 						if shade_at_pos == 0 {
-							let mut chs = image_buffer
-								.get_pixel_mut(x, y)
-								.channels_mut();
-							for j in 0..4 {
-								chs[3 - j] = (self.background_tint >> (8 * j)) as u8;
-							}
+							colour_tint(&mut image_buffer, width, x, y, self.background_tint);
 							continue;
 						}
 
-						let mut chs = image_buffer
-							.get_pixel_mut(x, y)
-							.channels_mut();
-
 						// Don't modify the alpha channel
-						for j in 1..4 {
-							let bge = (self.background_tint >> (8 * j)) as u8;
-							let curr_col = (colour >> (8 * j)) as u8;
+						for j in 0..3 {
+							let curr_col = (colour >> (24 - 8 * j)) as u8;
 
-							chs[3 - j] = (
-								((shade_at_pos * curr_col as u32 +
+							image_buffer[(x + y * width) * 3 + j] = (
+								((shade_at_pos * curr_col as usize +
 									// Add the existing background instead of doing alphas
-									((0xff - shade_at_pos) * bge as u32)
+									((0xff - shade_at_pos) * self.background_tint as usize)
 								) as f64
 									/ 255.
 								).round()) as u8;
@@ -399,12 +347,10 @@ impl OHLCRenderOptions {
 
 		debug!("Rendering process took {:?}", start_time.elapsed());
 		// File save occurs here
-		match File::create(path) {
-			Ok(ref mut file) => match image::ImageRgba8(image_buffer).save(file, image::PNG) {
-				Ok(_) => Ok(()),
-				Err(err) => Err(format!("Image write error: {:?}", err))
-			}
-			Err(err) => Err(format!("File create error: {:?}", err))
+		if let Err(err) = image::save_buffer(path, &image_buffer[..], width as u32, height as u32, image::RGB(8)) {
+			Err(format!("Image write error: {:?}", err))
+		} else {
+			Ok(())
 		}
 	}
 }
@@ -426,4 +372,18 @@ fn validate(data: &Vec<OHLC>) -> Result<(), &'static str> {
 		};
 	}
 	Ok(())
+}
+
+/// Colours the pixel with colour supplied by the RGBA field, alpha channel data is ignored.
+fn colour_rgb(buffer: &mut Vec<u8>, width: usize, x: usize, y: usize, rgba: u32) {
+	for j in 0..3 {
+		buffer[(x + y * width) * 3 + j] = (rgba >> (24 - 8 * j)) as u8;
+	}
+}
+
+/// Colours by tint (RGB all gets a value of tint)
+fn colour_tint(buffer: &mut Vec<u8>, width: usize, x: usize, y: usize, tint: u8) {
+	for j in 0..3 {
+		buffer[(x + y * width) * 3 + j] = tint;
+	}
 }
