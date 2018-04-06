@@ -187,7 +187,7 @@ impl OHLCRenderOptions {
 				for y in 0..height {
 					for x in 0..width {
 						for j in 0..3 {
-							image_buffer[x + y * width + j] = colours[j];
+							image_buffer[(x + y * width) * 3 + j] = colours[j];
 						}
 					}
 				}
