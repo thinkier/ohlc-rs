@@ -1,29 +1,28 @@
+extern crate image;
 #[macro_use]
 extern crate log;
 #[macro_use]
 extern crate serde_derive;
-extern crate image;
 extern crate tempdir;
 
 
+pub use data::*;
+use image::{ImageBuffer, Pixel};
+pub use options::*;
+use std::collections::hash_map::DefaultHasher;
+use std::fs::File;
+use std::hash::{Hash, Hasher};
+use std::path::*;
+use std::time::SystemTime;
 use tempdir::*;
+pub use utils::*;
 
 pub mod data;
 mod fonts;
 pub mod options;
+#[cfg(test)]
+mod tests;
 pub mod utils;
-
-pub use data::*;
-pub use options::*;
-pub use utils::*;
-
-use std::collections::hash_map::DefaultHasher;
-use std::fs::File;
-use std::time::SystemTime;
-use std::hash::{Hash, Hasher};
-use std::path::*;
-
-use image::{ImageBuffer, Pixel};
 
 /// OHLC Chart Configuration, mutate through the methods
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -32,8 +31,8 @@ pub struct OHLCRenderOptions {
 	pub(crate) title: String,
 	/// Colour for the title of the chart
 	pub(crate) title_colour: u32,
-	/// Background colour of the entire chart
-	pub(crate) background_colour: u32,
+	/// Background tint of the entire chart (the tint is the value for all of R, G and B)
+	pub(crate) background_tint: u8,
 	/// Colour for the "current value" dot and line across the chart
 	pub(crate) current_value_colour: u32,
 	/// The prefix for the values represented in the OHLC
@@ -60,7 +59,7 @@ impl OHLCRenderOptions {
 		OHLCRenderOptions {
 			title: String::new(),
 			title_colour: 0,
-			background_colour: 0xDDDDDDFF,
+			background_tint: 0xDD,
 			current_value_colour: 0x2E44EAFF,
 			value_prefix: String::new(),
 			value_suffix: String::new(),
@@ -95,8 +94,8 @@ impl OHLCRenderOptions {
 		self
 	}
 
-	pub fn background_colour(mut self, colour: u32) -> Self {
-		self.background_colour = colour;
+	pub fn background_tint(mut self, tint: u8) -> Self {
+		self.background_tint = tint;
 
 		self
 	}
@@ -165,17 +164,7 @@ impl OHLCRenderOptions {
 		let width = 1310;
 		let height = 650;
 
-		let mut image_buffer: ImageBuffer<image::Rgba<u8>, _> = ImageBuffer::new(width, height);
-
-		// Filling the background here
-		if self.background_colour % 256 > 0 {
-			for pix in image_buffer.pixels_mut() {
-				let chs = pix.channels_mut();
-				for j in 0..4 {
-					chs[3 - j] = (self.background_colour >> (8 * j)) as u8;
-				}
-			}
-		}
+		let mut image_buffer = vec![self.background_tint; width * height * 3];
 
 		// Width of the "candle" in the candlestick chart
 		let candle_width = ((width - (margin_left + margin_right)) as f64 / data.len() as f64).floor();
@@ -297,7 +286,7 @@ impl OHLCRenderOptions {
 				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as u32) - margin_bottom;
 				for x_offset in -2i32..3 {
 					for y_offset in -2i32..3 {
-						if !(x_offset == y_offset || x_offset + y_offset == 0 || x_offset == 0) { continue }
+						if !(x_offset == y_offset || x_offset + y_offset == 0 || x_offset == 0) { continue; }
 
 						let mut chs = image_buffer
 							.get_pixel_mut((x_offset + (x_center as i32)) as u32, (y_offset + (y as i32)) as u32)
@@ -381,7 +370,7 @@ impl OHLCRenderOptions {
 								.get_pixel_mut(x, y)
 								.channels_mut();
 							for j in 0..4 {
-								chs[3 - j] = (self.background_colour >> (8 * j)) as u8;
+								chs[3 - j] = (self.background_tint >> (8 * j)) as u8;
 							}
 							continue;
 						}
@@ -392,7 +381,7 @@ impl OHLCRenderOptions {
 
 						// Don't modify the alpha channel
 						for j in 1..4 {
-							let bge = (self.background_colour >> (8 * j)) as u8;
+							let bge = (self.background_tint >> (8 * j)) as u8;
 							let curr_col = (colour >> (8 * j)) as u8;
 
 							chs[3 - j] = (
@@ -433,171 +422,8 @@ fn validate(data: &Vec<OHLC>) -> Result<(), &'static str> {
 		} else if elem.c < elem.l {
 			Err("Closing value is lower than low value.")
 		} else {
-			continue
+			continue;
 		};
 	}
 	Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-	extern crate serde_json;
-
-	// use std::fs;
-	use std::io::{Read, Write};
-	use super::*;
-	use image::GenericImage;
-
-	#[test]
-	fn render_options_modification() {
-		assert_eq!(
-			OHLCRenderOptions {
-				title: String::new(),
-				title_colour: 0,
-				background_colour: 0xFEFEFEFE,
-				current_value_colour: 0x69696968,
-				value_prefix: String::new(),
-				value_suffix: String::new(),
-				time_units: 3600,
-				h_axis_options: AxisOptions::new(),
-				v_axis_options: AxisOptions::new(),
-				down_colour: 0x69696969,
-				up_colour: 0x69696970,
-			},
-			OHLCRenderOptions::new()
-				.indicator_colours(0x69696968, 0x69696969, 0x69696970)
-				.background_colour(0xFEFEFEFE)
-		);
-	}
-
-	#[test]
-	fn axis_options_modification() {
-		assert_eq!(
-			AxisOptions {
-				title: "I'm a meme".to_string(),
-				title_colour: 69,
-				line_colour: 70,
-				line_frequency: 71.,
-				label_colour: 72,
-				label_frequency: 73.,
-			},
-			AxisOptions::new()
-				.title("I'm a meme", 69)
-				.line(70, 71.)
-				.label(72, 73.)
-		);
-	}
-
-	#[test]
-	fn render_draw_sample_data() {
-		let mut buf = String::new();
-		let _ = File::open("sample_data.json").unwrap().read_to_string(&mut buf);
-		let _ = OHLCRenderOptions::new()
-			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
-			.v_axis(|va| va
-				.line(0xCCCCCCFF, 200.)
-				.label(0x222222FF, 200.)
-			)
-			.h_axis(|va| va
-				.line(0xD2D2D2FF, 24.)
-				.label(0x222222FF, 24.)
-			)
-			.value_strings("$", "")
-			.render_and_save(
-				self::serde_json::from_str(&buf).unwrap(),
-				&Path::new("test-draw-sample-data.png"),
-			);
-	}
-
-	/*
-		#[test]
-		fn render_repetition() {
-			let _ = OHLCRenderOptions::new()
-				.render_and_save(
-					vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 168],
-					&Path::new("test-repetition.png")
-				);
-		}
-
-		#[test]
-		fn render_draw_v_axis_lines() {
-			let _ = OHLCRenderOptions::new()
-				.v_axis(|va| va
-					.line_colour(0x000000FF)
-					.line_frequency(5.)
-				)
-				.render_and_save(
-					vec![OHLC { o: 2.0, h: 12.0, l: 0.0, c: 6.0 }; 168],
-					&Path::new("test-draw-lines-vaxis.png")
-				);
-		}
-
-		#[test]
-		fn render_up_down() {
-			let _ = OHLCRenderOptions::new()
-				.render_and_save(
-					vec![
-						OHLC { o: 1.0, h: 4.0, l: 0.0, c: 2.0 },
-						OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }
-					],
-					&Path::new("test-up-down.png")
-				);
-		}
-
-		#[test]
-		fn render_temp_copy() {
-			let _ = OHLCRenderOptions::new()
-				.render(
-					vec![OHLC { o: 2.0, h: 4.0, l: 0.0, c: 1.0 }; 3],
-					|path| if let Err(err) = fs::copy(path, &Path::new("test-temp-copy.png")) {
-						Err(format!("File copy error: {:?}", err))
-					} else {
-						Ok(())
-					});
-		}
-	*/
-
-	// Technically not a test, it just generates the fonts array based on the fonts png.
-	#[test]
-	fn generate_fonts_file() {
-		let img = image::open("consolas-18px-ascii-table.png").unwrap();
-
-		// Character sizes are 7 wide, 12 tall
-
-		// ascii table will have 126 elements
-		// First 31 elements of output array are empty
-
-		// Printables are 0x20 - 0x7E
-
-		let mut output = "pub const ASCII_TABLE: [[u8; 170]; 127] = [\n".to_string();
-
-		// 0x00 to 0x20 is filled with blank
-		for _ in 0..(32 + 1) {
-			output += "\t[0u8; 170],\n";
-		}
-
-		for base_y in 2..8 {
-			for base_x in 0..16 {
-				if (base_y == 7 && base_x == 15) || (base_y == 2 && base_x == 0) { continue }
-				output += "\t[\n";
-				// Write character into array.
-				for ptr_y in 0..17 {
-					output += "\t\t";
-					for ptr_x in 0..10 {
-						let x = (base_x * 20) + 10 + ptr_x;
-						let y = (base_y * 18) + ptr_y;
-
-						output += &format!("{},{}", 255 - img.get_pixel(x, y).data[0], if ptr_x != 9 { " " } else { "" });
-					}
-					output += "\n";
-				}
-				output += "\t],\n";
-			}
-		}
-
-		output += "];";
-
-		let mut f = File::create("src/fonts.rs").unwrap();
-		let _ = f.write(output.as_bytes());
-	}
 }
