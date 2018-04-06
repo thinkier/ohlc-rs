@@ -1,3 +1,4 @@
+extern crate env_logger;
 extern crate serde_json;
 
 use image::GenericImage;
@@ -12,7 +13,7 @@ fn render_options_modification() {
 		OHLCRenderOptions {
 			title: String::new(),
 			title_colour: 0,
-			background_tint: 0xFE,
+			background_colour: 0xFEFEFEFF,
 			current_value_colour: 0x69696968,
 			value_prefix: String::new(),
 			value_suffix: String::new(),
@@ -24,7 +25,7 @@ fn render_options_modification() {
 		},
 		OHLCRenderOptions::new()
 			.indicator_colours(0x69696968, 0x69696969, 0x69696970)
-			.background_tint(0xFE)
+			.background_colour(0xFEFEFEFF)
 	);
 }
 
@@ -48,9 +49,10 @@ fn axis_options_modification() {
 
 #[test]
 fn render_draw_sample_data() {
-	let mut buf = String::new();
-	let _ = File::open("sample_data.json").unwrap().read_to_string(&mut buf);
-	let _ = OHLCRenderOptions::new()
+	env_logger::init();
+
+	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
+	let options = OHLCRenderOptions::new()
 		.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 		.v_axis(|va| va
 			.line(0xCCCCCCFF, 200.)
@@ -60,11 +62,17 @@ fn render_draw_sample_data() {
 			.line(0xD2D2D2FF, 24.)
 			.label(0x222222FF, 24.)
 		)
-		.value_strings("$", "")
-		.render_and_save(
-			self::serde_json::from_str(&buf).unwrap(),
-			&Path::new("test-draw-sample-data.png"),
-		);
+		.background_colour(0x36393E)
+		.value_strings("$", "");
+
+	options.render_and_save(
+		data.clone(),
+		&Path::new("test-draw-sample-data.png"),
+	);
+	options.render_and_save(
+		data,
+		&Path::new("test-draw-sample-data.bmp"),
+	);
 }
 
 /*

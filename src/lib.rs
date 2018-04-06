@@ -30,7 +30,7 @@ pub struct OHLCRenderOptions {
 	/// Colour for the title of the chart
 	pub(crate) title_colour: u32,
 	/// Background tint of the entire chart (the tint is the value for all of R, G and B)
-	pub(crate) background_tint: u8,
+	pub(crate) background_colour: u32,
 	/// Colour for the "current value" dot and line across the chart
 	pub(crate) current_value_colour: u32,
 	/// The prefix for the values represented in the OHLC
@@ -57,7 +57,7 @@ impl OHLCRenderOptions {
 		OHLCRenderOptions {
 			title: String::new(),
 			title_colour: 0,
-			background_tint: 0xDD,
+			background_colour: 0xDDDDDDFF,
 			current_value_colour: 0x2E44EAFF,
 			value_prefix: String::new(),
 			value_suffix: String::new(),
@@ -92,8 +92,8 @@ impl OHLCRenderOptions {
 		self
 	}
 
-	pub fn background_tint(mut self, tint: u8) -> Self {
-		self.background_tint = tint;
+	pub fn background_colour(mut self, colour: u32) -> Self {
+		self.background_colour = colour;
 
 		self
 	}
@@ -149,6 +149,10 @@ impl OHLCRenderOptions {
 			return Err(format!("Data validation error: {}", err));
 		}
 
+		#[cfg(test)] {
+			debug!("Validated input data @ {:?}", start_time.elapsed());
+		}
+
 		// String.bytes, top edge x, leftmost edge y, colour, do a border
 		let mut text_renders: Vec<(Vec<u8>, usize, usize, u32, bool)> = vec![];
 
@@ -162,7 +166,37 @@ impl OHLCRenderOptions {
 		let width = 1310;
 		let height = 650;
 
-		let mut image_buffer = vec![self.background_tint; width * height * 3];
+		#[cfg(test)] {
+			debug!("Initialized variables @ {:?}", start_time.elapsed());
+		}
+
+		let mut image_buffer = vec![(self.background_colour >> 24) as u8; width * height * 3];
+
+		#[cfg(test)] {
+			debug!("Allocated vector @ {:?}", start_time.elapsed());
+		}
+
+		{
+			let r = (self.background_colour >> 24) as u8;
+			let g = (self.background_colour >> 16) as u8;
+			let b = (self.background_colour >> 8) as u8;
+
+			if r != g || g != b {
+				let colours = [r, g, b];
+
+				for y in 0..height {
+					for x in 0..width {
+						for j in 0..3 {
+							image_buffer[x + y * width + j] = colours[j];
+						}
+					}
+				}
+			}
+		}
+
+		#[cfg(test)] {
+			debug!("Populated background @ {:?}", start_time.elapsed());
+		}
 
 		// Width of the "candle" in the candlestick chart
 		let candle_width = ((width - (margin_left + margin_right)) as f64 / data.len() as f64).floor();
@@ -172,13 +206,17 @@ impl OHLCRenderOptions {
 		// Defines how much the Y value should increment for every unit of the OHLC supplied
 		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
 
+		#[cfg(test)] {
+			debug!("Calculated candle data @ {:?}", start_time.elapsed());
+		}
+
 		// Rendering the horizontal (price) lines occur here
 		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
 			for y_es in 0..(height - (margin_top + margin_bottom)) {
 				if (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency) {
 					let y = y_es + margin_top;
 					for x in margin_left..(width - margin_right) {
-						colour_rgb(&mut image_buffer, width, x, y, self.v_axis_options.line_colour);
+						colour_rgba(&mut image_buffer, width, x, y, self.v_axis_options.line_colour);
 					}
 				}
 
@@ -196,6 +234,10 @@ impl OHLCRenderOptions {
 			}
 		}
 
+		#[cfg(test)] {
+			debug!("Rendered horizontal lines (price ticks) @ {:?}", start_time.elapsed());
+		}
+
 		// Rendering the vertical (time) lines occur here
 		if self.h_axis_options.line_colour % 256 > 0 && self.h_axis_options.line_frequency > 0. {
 			let data_len = data.len();
@@ -209,7 +251,7 @@ impl OHLCRenderOptions {
 				let x = x_idx * line_interval + margin_left;
 
 				for y in margin_top..(height - margin_bottom) {
-					colour_rgb(&mut image_buffer, width, x, y, self.h_axis_options.line_colour);
+					colour_rgba(&mut image_buffer, width, x, y, self.h_axis_options.line_colour);
 				}
 			}
 
@@ -226,6 +268,10 @@ impl OHLCRenderOptions {
 					text_renders.push((chars, x - 10, height - margin_bottom + 5, self.h_axis_options.label_colour, false))
 				}
 			}
+		}
+
+		#[cfg(test)] {
+			debug!("Rendered vertical lines (time ticks) @ {:?}", start_time.elapsed());
 		}
 
 		// The below section renders the OHLC candles
@@ -246,7 +292,7 @@ impl OHLCRenderOptions {
 				let y = height - y_state - margin_bottom;
 				// Introduce right padding if the candle isn't too short
 				for x in begin_pos..(if end_pos - begin_pos > 3 { end_pos - 1 } else { end_pos + 1 }) {
-					colour_rgb(&mut image_buffer, width, x, y, colour);
+					colour_rgba(&mut image_buffer, width, x, y, colour);
 				}
 			}
 
@@ -255,7 +301,7 @@ impl OHLCRenderOptions {
 				let y = height - y_state - margin_bottom;
 
 				for x in (x_center - stick_width - 1) as usize..(x_center + stick_width - 1) as usize {
-					colour_rgb(&mut image_buffer, width, x, y, colour);
+					colour_rgba(&mut image_buffer, width, x, y, colour);
 				}
 			}
 
@@ -266,17 +312,21 @@ impl OHLCRenderOptions {
 					for y_offset in -2i32..3 {
 						if !(x_offset == y_offset || x_offset + y_offset == 0 || x_offset == 0) { continue; }
 
-						colour_rgb(&mut image_buffer, width, (x_offset + (x_center as i32)) as usize, (y_offset + (y as i32)) as usize, self.current_value_colour);
+						colour_rgba(&mut image_buffer, width, (x_offset + (x_center as i32)) as usize, (y_offset + (y as i32)) as usize, self.current_value_colour);
 					}
 				}
 			}
+		}
+
+		#[cfg(test)] {
+			debug!("Rendered candles @ {:?}", start_time.elapsed());
 		}
 
 		// Current, lowest, highest value line is rendered inside here.
 		for (val, colour) in vec![(ohlc_of_set.l, self.down_colour), (ohlc_of_set.h, self.up_colour), (ohlc_of_set.c, self.current_value_colour)] {
 			let y = height - (((val - ohlc_of_set.l) / y_val_increment).round() as usize) - margin_bottom;
 			for half_x in (margin_left / 2)..((width - margin_right) / 2) {
-				colour_rgb(&mut image_buffer, width, half_x * 2, y, colour);
+				colour_rgba(&mut image_buffer, width, half_x * 2, y, colour);
 			}
 
 			// Add label
@@ -288,6 +338,10 @@ impl OHLCRenderOptions {
 				}
 				text_renders.push((chars, width - margin_right + 10, y - 8, colour, true))
 			}
+		}
+
+		#[cfg(test)] {
+			debug!("Rendered basic indicator lines @ {:?}", start_time.elapsed());
 		}
 
 		// Add title text
@@ -302,13 +356,13 @@ impl OHLCRenderOptions {
 					for y_mag in 0..2 {
 						let y = base_y + y_mag * 17 + y_mag * 1 - 1;
 
-						colour_rgb(&mut image_buffer, width, x, y, colour);
+						colour_rgba(&mut image_buffer, width, x, y, colour);
 					}
 				}
 				for x_mag in 0..2 {
 					let x = base_x + x_mag * 10 * chars_len as usize + x_mag * 2 - 1;
 					for y in (base_y - 1)..(base_y + 17 + 1) {
-						colour_rgb(&mut image_buffer, width, x, y, colour);
+						colour_rgba(&mut image_buffer, width, x, y, colour);
 					}
 				}
 			}
@@ -324,7 +378,7 @@ impl OHLCRenderOptions {
 						let shade_at_pos = char_font[incr_x + incr_y * 10] as usize;
 
 						if shade_at_pos == 0 {
-							colour_tint(&mut image_buffer, width, x, y, self.background_tint);
+							colour_rgba(&mut image_buffer, width, x, y, self.background_colour);
 							continue;
 						}
 
@@ -335,7 +389,7 @@ impl OHLCRenderOptions {
 							image_buffer[(x + y * width) * 3 + j] = (
 								((shade_at_pos * curr_col as usize +
 									// Add the existing background instead of doing alphas
-									((0xff - shade_at_pos) * self.background_tint as usize)
+									((0xff - shade_at_pos) * self.background_colour as usize)
 								) as f64
 									/ 255.
 								).round()) as u8;
@@ -345,11 +399,20 @@ impl OHLCRenderOptions {
 			}
 		}
 
-		debug!("Rendering process took {:?}", start_time.elapsed());
+		#[cfg(test)] {
+			debug!("Rendered all text / Completed rendering @ {:?}", start_time.elapsed());
+		}
+
 		// File save occurs here
 		if let Err(err) = image::save_buffer(path, &image_buffer[..], width as u32, height as u32, image::RGB(8)) {
 			Err(format!("Image write error: {:?}", err))
 		} else {
+			#[cfg(test)] {
+				debug!("Chart PNG compression finished {:?}", start_time.elapsed());
+			}
+
+			debug!("Chart rendered in {:?}", start_time.elapsed());
+
 			Ok(())
 		}
 	}
@@ -375,15 +438,8 @@ fn validate(data: &Vec<OHLC>) -> Result<(), &'static str> {
 }
 
 /// Colours the pixel with colour supplied by the RGBA field, alpha channel data is ignored.
-fn colour_rgb(buffer: &mut Vec<u8>, width: usize, x: usize, y: usize, rgba: u32) {
+fn colour_rgba(buffer: &mut Vec<u8>, width: usize, x: usize, y: usize, rgba: u32) {
 	for j in 0..3 {
 		buffer[(x + y * width) * 3 + j] = (rgba >> (24 - 8 * j)) as u8;
-	}
-}
-
-/// Colours by tint (RGB all gets a value of tint)
-fn colour_tint(buffer: &mut Vec<u8>, width: usize, x: usize, y: usize, tint: u8) {
-	for j in 0..3 {
-		buffer[(x + y * width) * 3 + j] = tint;
 	}
 }
