@@ -38,10 +38,8 @@ pub struct OHLCRenderOptions {
 	/// The suffix for the values represented in the OHLC
 	pub(crate) value_suffix: String,
 	/// The amount of time, in seconds, each OHLC objects represent
-	/// Currently ignored
 	pub(crate) time_units: u64,
 	/// Options for the horizontal axis
-	/// Currently ignored
 	pub(crate) h_axis_options: AxisOptions,
 	/// Options for the vertical axis
 	pub(crate) v_axis_options: AxisOptions,
@@ -94,6 +92,12 @@ impl OHLCRenderOptions {
 
 	pub fn background_colour(mut self, colour: u32) -> Self {
 		self.background_colour = colour;
+
+		self
+	}
+
+	pub fn time_units(mut self, time: u64) -> Self {
+		self.time = time;
 
 		self
 	}
