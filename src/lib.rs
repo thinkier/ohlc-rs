@@ -96,8 +96,8 @@ impl OHLCRenderOptions {
 		self
 	}
 
-	pub fn time_units(mut self, time: u64) -> Self {
-		self.time = time;
+	pub fn time_units(mut self, time_units: u64) -> Self {
+		self.time_units = time_units;
 
 		self
 	}
