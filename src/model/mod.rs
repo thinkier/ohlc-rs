@@ -81,11 +81,6 @@ impl<'a> ChartBuffer<'a> {
 		self.colour(x, y, rgba);
 	}
 
-	/// Render a quadrilateral by the 4 given points and the colour filling
-	pub fn quad(&mut self, mut p1: Point, mut p2: Point, mut p3: Point, mut p4: Point, rgba: u32) {
-		unimplemented!()
-	}
-
 	/// Render a rectangle by the min/max x and y points and colour
 	pub fn rect(&mut self, mut x1: usize, mut y1: usize, mut x2: usize, mut y2: usize, rgba: u32) {
 		if x1 > x2 {
