@@ -54,30 +54,25 @@ impl RendererExtension for BollingerBand {
 
 		for i in 0..(bands.len() - 1) {
 			let time = (i as i64 * buffer.timeframe / data.len() as i64) as i64;
-			let time_next_period = ((i as i64+1) * buffer.timeframe / data.len() as i64) as i64;
+			let time_next_period = ((i as i64 + 1) * buffer.timeframe / data.len() as i64) as i64;
 
 			let p1_h = buffer.data_to_coords(bands[i].higher, time);
-			buffer.colour_point(p1_h, 0xFFFF0000);
 			let p2_h = buffer.data_to_coords(bands[i + 1].higher, time_next_period);
-			buffer.colour_point(p2_h, 0xFFFF0000);
 
-			buffer.line(p1_h, p2_h,  self.line_colour);
+			buffer.line(p1_h, p2_h, self.line_colour);
 
 			let p1_m = buffer.data_to_coords(bands[i].median, time);
-			buffer.colour_point(p1_m, 0xFFFF0000);
 			let p2_m = buffer.data_to_coords(bands[i + 1].median, time_next_period);
-			buffer.colour_point(p2_m, 0xFFFF0000);
 
-			buffer.line(p1_m, p2_m,  self.line_colour);
+			buffer.line(p1_m, p2_m, self.line_colour);
 
 			let p1_l = buffer.data_to_coords(bands[i].lower, time);
-			buffer.colour_point(p1_l, 0xFFFF0000);
 			let p2_l = buffer.data_to_coords(bands[i + 1].lower, time_next_period);
-			buffer.colour_point(p2_l, 0xFFFF0000);
 
-			buffer.line(p1_l, p2_l,  self.line_colour);
+			buffer.line(p1_l, p2_l, self.line_colour);
 		}
 	}
+
 	fn name(&self) -> String {
 		format!("BB({}, {})", self.periods, self.standard_deviations)
 	}
