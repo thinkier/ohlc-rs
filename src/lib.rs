@@ -30,30 +30,30 @@ pub mod utils;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct OHLCRenderOptions {
 	/// Title of the chart
-	pub(crate) title: String,
+	pub title: String,
 	/// Colour for the title of the chart
-	pub(crate) title_colour: u32,
+	pub title_colour: u32,
 	/// Background tint of the entire chart (the tint is the value for all of R, G and B)
-	pub(crate) background_colour: u32,
+	pub background_colour: u32,
 	/// Colour for the "current value" dot and line across the chart
-	pub(crate) current_value_colour: u32,
+	pub current_value_colour: u32,
 	/// The prefix for the values represented in the OHLC
-	pub(crate) value_prefix: String,
+	pub value_prefix: String,
 	/// The suffix for the values represented in the OHLC
-	pub(crate) value_suffix: String,
+	pub value_suffix: String,
 	/// The amount of time, in seconds, each OHLC objects represent
-	pub(crate) time_units: u64,
+	pub time_units: u64,
 	/// Options for the horizontal axis
-	pub(crate) h_axis_options: AxisOptions,
+	pub h_axis_options: AxisOptions,
 	/// Options for the vertical axis
-	pub(crate) v_axis_options: AxisOptions,
+	pub v_axis_options: AxisOptions,
 	/// RGBA(8) Colour for when the OHLC indicates fall
-	pub(crate) down_colour: u32,
+	pub down_colour: u32,
 	/// RGBA(8) Colour for when the OHLC indicates rise
-	pub(crate) up_colour: u32,
+	pub up_colour: u32,
 	/// List of extensions to render
 	#[serde(skip)]
-	pub(crate) render_extensions: Vec<&'static RendererExtension>,
+	render_extensions: Vec<&'static RendererExtension>,
 }
 
 impl OHLCRenderOptions {
