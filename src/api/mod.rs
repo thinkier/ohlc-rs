@@ -1,6 +1,6 @@
-use data::OHLC;
-use model::ChartBuffer;
-use OHLCRenderOptions;
+pub use data::OHLC;
+pub use model::ChartBuffer;
+pub use OHLCRenderOptions;
 
 pub trait RendererExtension {
 	fn apply(&self, _config: &OHLCRenderOptions, _buffer: &mut ChartBuffer, _data: &[OHLC]);
