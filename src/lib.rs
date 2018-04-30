@@ -122,7 +122,7 @@ impl OHLCRenderOptions {
 		self
 	}
 
-	pub fn add_renderer<RE:RendererExtension>(mut self, re:RE) -> Self {
+	pub fn add_renderer<RE: RendererExtension>(mut self, re: RE) -> Self {
 		self.render_extensions.push(re);
 
 		self
