@@ -15,8 +15,10 @@ use std::time::SystemTime;
 use tempdir::*;
 pub use utils::*;
 
+pub mod api;
 pub mod data;
 mod fonts;
+pub mod model;
 pub mod options;
 #[cfg(test)]
 mod tests;
