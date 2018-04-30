@@ -112,10 +112,10 @@ impl<'a> ChartBuffer<'a> {
 
 		let adjacent = Self::distance(p1.0, p2.0) as f64;
 		let opposite = Self::distance(p1.1, p2.1) as f64;
-		let theta_rad = (opposite / adjacent).atan();
+		let theta = (opposite / adjacent).atan();
 
 		for x in p1.0..p2.0 {
-			let y = (p1.1 as f64 + theta_rad.tan() * (x - p1.0 + 1) as f64) as usize;
+			let y = (p1.1 as f64 + theta.tan() * (x - p1.0 + 1) as f64) as usize;
 			self.colour(x, y, rgba);
 		}
 
@@ -124,7 +124,7 @@ impl<'a> ChartBuffer<'a> {
 		}
 
 		for y in p1.1..p2.1 {
-			let x = (p1.0 as f64 + (y - p1.1 + 1) as f64 / theta_rad.tan()) as usize;
+			let x = (p1.0 as f64 + (y - p1.1 + 1) as f64 / theta.tan()) as usize;
 			self.colour(x, y, rgba);
 		}
 	}
