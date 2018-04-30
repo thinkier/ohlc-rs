@@ -28,7 +28,7 @@ pub mod utils;
 
 /// OHLC Chart Configuration, mutate through the methods
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct OHLCRenderOptions {
+pub struct OHLCRenderOptions<RE: RendererExtension + Sized> {
 	/// Title of the chart
 	pub title: String,
 	/// Colour for the title of the chart
@@ -51,14 +51,13 @@ pub struct OHLCRenderOptions {
 	pub down_colour: u32,
 	/// RGBA(8) Colour for when the OHLC indicates rise
 	pub up_colour: u32,
-	/// List of extensions to render
-	#[serde(skip)]
-	render_extensions: Vec<&'static RendererExtension>,
+	/// Render extension
+	pub(crate) render_extension: RE,
 }
 
-impl OHLCRenderOptions {
+impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 	/// Creates an object for render options with default parameters
-	pub fn new() -> OHLCRenderOptions {
+	pub fn new(render_extension: RE) -> OHLCRenderOptions<RE> {
 		OHLCRenderOptions {
 			title: String::new(),
 			title_colour: 0,
@@ -72,7 +71,7 @@ impl OHLCRenderOptions {
 			v_axis_options: AxisOptions::new(),
 			down_colour: 0xD33040FF,
 			up_colour: 0x27A819FF,
-			render_extensions: vec![],
+			render_extension,
 		}
 	}
 
@@ -120,12 +119,6 @@ impl OHLCRenderOptions {
 	pub fn v_axis<F>(mut self, mut f: F) -> Self
 		where F: FnMut(AxisOptions) -> AxisOptions {
 		self.v_axis_options = (f)(self.v_axis_options);
-
-		self
-	}
-
-	pub fn add_renderer<RE: RendererExtension + Sized>(mut self, re: &'static RE) -> Self {
-		self.render_extensions.push(re);
 
 		self
 	}
@@ -430,12 +423,10 @@ impl OHLCRenderOptions {
 				right: margin_right,
 			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, &mut image_buffer[..]);
 
-			for ext in &self.render_extensions {
-				ext.apply(&self, &mut ch_buffer, &data[..]);
+			self.render_extension.apply(&mut ch_buffer, &data[..]);
 
-				#[cfg(test)] {
-					debug!("Rendered extension:{} @ {:?}", ext.name(), start_time.elapsed());
-				}
+			#[cfg(test)] {
+				debug!("Rendered extension:{} @ {:?}", self.render_extension.name(), start_time.elapsed());
 			}
 		}
 

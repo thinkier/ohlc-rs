@@ -1,5 +1,12 @@
 use std::mem;
 
+pub mod bollinger_bands;
+pub mod no_extension;
+#[cfg(test)]
+pub mod test_fill;
+#[cfg(test)]
+pub mod test_line;
+
 pub type Point = (usize, usize);
 
 pub struct Margin {
@@ -52,24 +59,24 @@ impl<'a> ChartBuffer<'a> {
 		let x = {
 			let prog = time as f64 / self.timeframe as f64;
 
-			if prog >= 0. {
-				self.width - self.margin.right
-			} else if prog <= -self.timeframe as f64 {
+			if prog <= 0. {
 				self.margin.left
+			} else if prog >= 1. {
+				self.width - self.margin.right
 			} else {
-				self.margin.right + (prog * (self.width - (self.margin.right + self.margin.left)) as f64) as usize
+				self.margin.left + (prog * (self.width - (self.margin.right + self.margin.left)) as f64) as usize
 			}
 		};
 
 		let y = {
-			let prog = price / (self.max_price - self.min_price);
+			let prog = (price - self.min_price) / (self.max_price - self.min_price);
 
 			if prog >= 1. {
 				self.margin.top
 			} else if prog <= 0. {
 				self.height - self.margin.bottom
 			} else {
-				self.margin.top + (prog * (self.height - (self.margin.top + self.margin.bottom)) as f64) as usize
+				self.height - self.margin.bottom - (prog * (self.height - (self.margin.top + self.margin.bottom)) as f64) as usize
 			}
 		};
 
@@ -98,40 +105,45 @@ impl<'a> ChartBuffer<'a> {
 	}
 
 	/// Render a line between 2 points
-	pub fn line(&mut self, mut p1: Point, mut p2: Point, thickness: usize, rgba: u32) {
-		let thickness = thickness / 2;
-
+	pub fn line(&mut self, mut p1: Point, mut p2: Point, rgba: u32) {
 		if p1.0 > p2.0 {
-			mem::swap(&mut p1.0, &mut p2.0);
-		}
-		if p1.1 > p2.1 {
-			mem::swap(&mut p1.1, &mut p2.1);
+			mem::swap(&mut p1, &mut p2);
 		}
 
-		let run = p2.0 - p1.0;
-		let rise = p2.1 - p1.1;
-		let gradient = rise as f64 / run as f64;
+		let adjacent = Self::distance(p1.0, p2.0) as f64;
+		let opposite = Self::distance(p1.1, p2.1) as f64;
+		let theta_rad = (opposite / adjacent).atan();
 
-		let mut y = p1.1 as f64;
-		for x in p1.0..(p2.0 + 1) {
-			y += gradient;
-			let y = y.round() as usize;
-
+		for x in p1.0..p2.0 {
+			let y = (p1.1 as f64 + theta_rad.tan() * (x - p1.0 + 1) as f64) as usize;
 			self.colour(x, y, rgba);
-			if thickness >= 1 {
-				self.colour(x, y + thickness, rgba);
-				self.colour(x, y - thickness, rgba);
-			}
+		}
+
+		if p1.1 > p2.1 {
+			mem::swap(&mut p1, &mut p2);
+		}
+
+		for y in p1.1..p2.1 {
+			let x = (p1.0 as f64 + (y - p1.1 + 1) as f64 / theta_rad.tan()) as usize;
+			self.colour(x, y, rgba);
 		}
 	}
 
+	pub fn colour_point(&mut self, point: Point, rgba: u32) {
+		self.colour(point.0, point.1, rgba);
+	}
+
 	pub fn colour(&mut self, x: usize, y: usize, rgba: u32) {
-		if x > self.width || y > self.height {
+		if x >= self.width || y >= self.height {
 			return;
 		}
 
 		for j in 0..3 {
 			self.buffer[(x + y * self.width) * 3 + j] = (rgba >> (24 - 8 * j)) as u8;
 		}
+	}
+
+	pub fn distance(x1: usize, x2: usize) -> isize {
+		x2 as isize - x1 as isize
 	}
 }

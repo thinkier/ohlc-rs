@@ -1,21 +1,86 @@
 use api::RendererExtension;
 use data::OHLC;
-use model::ChartBuffer;
-use OHLCRenderOptions;
+use model::*;
 
+#[derive(Debug)]
+struct BandPoints {
+	higher: f64,
+	median: f64,
+	lower: f64,
+}
+
+#[derive(Debug)]
 pub struct BollingerBand {
 	periods: usize,
 	standard_deviations: usize,
+	line_colour: u32,
 }
 
 impl BollingerBand {
-	pub fn new(periods: usize, standard_deviations: usize) -> BollingerBand {
-		BollingerBand { periods, standard_deviations }
+	pub fn new(periods: usize, standard_deviations: usize, line_colour: u32) -> BollingerBand {
+		BollingerBand { periods, standard_deviations, line_colour }
 	}
 }
 
 impl RendererExtension for BollingerBand {
-	fn apply(&self, config: &OHLCRenderOptions, buffer: &mut ChartBuffer, data: &[OHLC]) {}
+	fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
+		let half_period = self.periods / 2;
+
+		let mut bands = vec![];
+
+		for i in 0..data.len() {
+			let min = if i > half_period { i - half_period } else { 0 };
+			let max = {
+				let proto_max = i + half_period + 1;
+				if proto_max >= data.len() {
+					data.len() - 1
+				} else {
+					proto_max
+				}
+			};
+
+			let data_slice = &data[min..max];
+			let medians = into_median(data_slice);
+			let scaled_std_dev = std_dev(&medians[..]) * self.standard_deviations as f64;
+			let median_of_current = middle_of_ohlc(data[i]);
+			let points = BandPoints {
+				higher: median_of_current + scaled_std_dev,
+				median: median_of_current,
+				lower: median_of_current - scaled_std_dev,
+			};
+
+			bands.push(points);
+		}
+
+		for i in 0..(bands.len() - 1) {
+			let time = (i as i64 * buffer.timeframe / data.len() as i64) as i64;
+			let time_next_period = ((i as i64+1) * buffer.timeframe / data.len() as i64) as i64;
+
+			let p1_h = buffer.data_to_coords(bands[i].higher, time);
+			buffer.colour_point(p1_h, 0xFFFF0000);
+			let p2_h = buffer.data_to_coords(bands[i + 1].higher, time_next_period);
+			buffer.colour_point(p2_h, 0xFFFF0000);
+
+			buffer.line(p1_h, p2_h,  self.line_colour);
+
+			let p1_m = buffer.data_to_coords(bands[i].median, time);
+			buffer.colour_point(p1_m, 0xFFFF0000);
+			let p2_m = buffer.data_to_coords(bands[i + 1].median, time_next_period);
+			buffer.colour_point(p2_m, 0xFFFF0000);
+
+			buffer.line(p1_m, p2_m,  self.line_colour);
+
+			let p1_l = buffer.data_to_coords(bands[i].lower, time);
+			buffer.colour_point(p1_l, 0xFFFF0000);
+			let p2_l = buffer.data_to_coords(bands[i + 1].lower, time_next_period);
+			buffer.colour_point(p2_l, 0xFFFF0000);
+
+			buffer.line(p1_l, p2_l,  self.line_colour);
+		}
+	}
+	fn name(&self) -> String {
+		format!("BB({}, {})", self.periods, self.standard_deviations)
+	}
 }
 
 fn std_dev(prices: &[f64]) -> f64 {
@@ -23,22 +88,32 @@ fn std_dev(prices: &[f64]) -> f64 {
 	let mut squared_diff_sum = 0.;
 
 	for price in prices {
-		squared_diff_sum += (avg - price).pow(2);
+		squared_diff_sum += (avg - price).powf(2.);
 	}
 
-	(squared_diff_sum / (prices.len() - 1)).sqrt()
+	(squared_diff_sum / (prices.len() - 1) as f64).sqrt()
 }
 
 fn avg(prices: &[f64]) -> f64 {
 	let mut sum = 0.;
 
 	for price in prices {
-		sum += price;
+		sum += *price;
 	}
 
-	sum / prices.len()
+	sum / prices.len() as f64
 }
 
 fn middle_of_ohlc(ohlc: OHLC) -> f64 {
-	(ohlc.h - ohlc.l) / 2 + ohlc.l
+	((ohlc.h - ohlc.l) / 2.) + ohlc.l
+}
+
+fn into_median(list: &[OHLC]) -> Vec<f64> {
+	let mut buffer = vec![];
+
+	for ohlc in list {
+		buffer.push(middle_of_ohlc(*ohlc));
+	}
+
+	return buffer;
 }
