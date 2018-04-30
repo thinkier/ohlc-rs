@@ -1,5 +1,9 @@
 use std::mem;
 
+mod bollinger_bands;
+
+pub type Point = (usize, usize);
+
 pub struct Margin {
 	pub top: usize,
 	pub bottom: usize,
@@ -46,7 +50,7 @@ impl<'a> ChartBuffer<'a> {
 	}
 
 	/// Returns: (x, y)
-	pub fn data_to_coords(&self, price: f64, time: i64) -> (usize, usize) {
+	pub fn data_to_coords(&self, price: f64, time: i64) -> Point {
 		let x = {
 			let prog = time as f64 / self.timeframe as f64;
 
@@ -79,6 +83,12 @@ impl<'a> ChartBuffer<'a> {
 		self.colour(x, y, rgba);
 	}
 
+	/// Render a quadrilateral by the 4 given points and the colour filling
+	pub fn quad(&mut self, mut p1: Point, mut p2: Point, mut p3: Point, mut p4: Point, rgba: u32) {
+		unimplemented!()
+	}
+
+	/// Render a rectangle by the min/max x and y points and colour
 	pub fn rect(&mut self, mut x1: usize, mut y1: usize, mut x2: usize, mut y2: usize, rgba: u32) {
 		if x1 > x2 {
 			mem::swap(&mut x1, &mut x2);
@@ -94,18 +104,19 @@ impl<'a> ChartBuffer<'a> {
 		}
 	}
 
-	pub fn line(&mut self, mut x1: usize, mut y1: usize, mut x2: usize, mut y2: usize, thickness: usize, rgba: u32) {
+	/// Render a line between 2 points
+	pub fn line(&mut self, mut p1: Point, mut p2: Point, thickness: usize, rgba: u32) {
 		let thickness = thickness / 2;
 
-		if x1 > x2 {
-			mem::swap(&mut x1, &mut x2);
+		if p1.0 > p2.0 {
+			mem::swap(&mut p1.0, &mut p2.0);
 		}
-		if y1 > y2 {
-			mem::swap(&mut y1, &mut y2);
+		if p1.1 > p2.1 {
+			mem::swap(&mut p1.1, &mut p2.1);
 		}
 
-		let run = x2 - x1;
-		let rise = y2 - y1;
+		let run = p2.0 - p1.0;
+		let rise = p2.1 - p1.1;
 		let gradient = rise as f64 / run as f64;
 
 		let mut y = y1 as f64;
