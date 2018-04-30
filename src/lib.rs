@@ -6,6 +6,7 @@ extern crate serde_derive;
 extern crate tempdir;
 
 
+use api::RendererExtension;
 pub use data::*;
 pub use options::*;
 use std::collections::hash_map::DefaultHasher;
@@ -49,6 +50,8 @@ pub struct OHLCRenderOptions {
 	pub(crate) down_colour: u32,
 	/// RGBA(8) Colour for when the OHLC indicates rise
 	pub(crate) up_colour: u32,
+	/// List of extensions to render
+	pub(crate) render_extensions: Vec<RendererExtension>,
 }
 
 impl OHLCRenderOptions {
@@ -67,6 +70,7 @@ impl OHLCRenderOptions {
 			v_axis_options: AxisOptions::new(),
 			down_colour: 0xD33040FF,
 			up_colour: 0x27A819FF,
+			render_extensions: vec![],
 		}
 	}
 
@@ -114,6 +118,12 @@ impl OHLCRenderOptions {
 	pub fn v_axis<F>(mut self, mut f: F) -> Self
 		where F: FnMut(AxisOptions) -> AxisOptions {
 		self.v_axis_options = (f)(self.v_axis_options);
+
+		self
+	}
+
+	pub fn add_renderer<RE:RendererExtension>(mut self, re:RE) -> Self {
+		self.render_extensions.push(re);
 
 		self
 	}
