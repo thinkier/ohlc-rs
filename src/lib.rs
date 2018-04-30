@@ -417,7 +417,19 @@ impl OHLCRenderOptions {
 		}
 
 		#[cfg(test)] {
-			debug!("Rendered all text / Completed rendering @ {:?}", start_time.elapsed());
+			debug!("Rendered all text @ {:?}", start_time.elapsed());
+		}
+
+		for ext in self.render_extensions {
+			ext.apply();
+
+			#[cfg(test)] {
+				debug!("Rendered extension:{} @ {:?}", ext.name(), start_time.elapsed());
+			}
+		}
+
+		#[cfg(test)] {
+			debug!("Completed all rendering @ {:?}", start_time.elapsed());
 		}
 
 		// File save occurs here
