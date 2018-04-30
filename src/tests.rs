@@ -196,7 +196,7 @@ fn render_draw_sample_data_with_test_thicc_line() {
 
 		let _ = options.render_and_save(
 			data.clone(),
-			&Path::new("test-draw-sample-data+test-thicc_line.png"),
+			&Path::new("test-draw-sample-data+test-line.png"),
 		);
 	}
 }
