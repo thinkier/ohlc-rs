@@ -2,6 +2,10 @@
 name = "ohlc"
 version = "0.1.0"
 authors = ["UninterestinAcc <uninterestinacc@users.noreply.github.com>"]
+build = "build/build.rs"
+
+[build-dependencies]
+image = "0.17"
 
 [dependencies]
 serde = "1.0"
