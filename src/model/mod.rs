@@ -124,7 +124,7 @@ impl<'a> ChartBuffer<'a> {
 		}
 
 		for y in p1.1..p2.1 {
-			let x = (p1.0 as f64 + (y - p1.1 + 1) as f64 / theta.tan()) as usize;
+			let x = (p1.0 as f64 + (y - p1.1) as f64 / theta.tan()) as usize;
 			self.colour(x, y, rgba);
 		}
 	}
