@@ -5,9 +5,9 @@ extern crate log;
 extern crate serde_derive;
 extern crate tempdir;
 
-
 use api::RendererExtension;
 pub use data::*;
+use model::*;
 pub use options::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -15,6 +15,7 @@ use std::path::*;
 use std::time::SystemTime;
 use tempdir::*;
 pub use utils::*;
+
 
 pub mod api;
 pub mod data;
@@ -51,7 +52,8 @@ pub struct OHLCRenderOptions {
 	/// RGBA(8) Colour for when the OHLC indicates rise
 	pub(crate) up_colour: u32,
 	/// List of extensions to render
-	pub(crate) render_extensions: Vec<RendererExtension>,
+	#[serde(skip)]
+	pub(crate) render_extensions: Vec<&'static RendererExtension>,
 }
 
 impl OHLCRenderOptions {
@@ -122,7 +124,7 @@ impl OHLCRenderOptions {
 		self
 	}
 
-	pub fn add_renderer<RE: RendererExtension>(mut self, re: RE) -> Self {
+	pub fn add_renderer<RE: RendererExtension + Sized>(mut self, re: &'static RE) -> Self {
 		self.render_extensions.push(re);
 
 		self
@@ -420,11 +422,20 @@ impl OHLCRenderOptions {
 			debug!("Rendered all text @ {:?}", start_time.elapsed());
 		}
 
-		for ext in self.render_extensions {
-			ext.apply();
+		{
+			let mut ch_buffer = ChartBuffer::new(width, height, Margin {
+				top: margin_top,
+				bottom: margin_bottom,
+				left: margin_left,
+				right: margin_right,
+			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, &mut image_buffer[..]);
 
-			#[cfg(test)] {
-				debug!("Rendered extension:{} @ {:?}", ext.name(), start_time.elapsed());
+			for ext in &self.render_extensions {
+				ext.apply(&self, &mut ch_buffer, &data[..]);
+
+				#[cfg(test)] {
+					debug!("Rendered extension:{} @ {:?}", ext.name(), start_time.elapsed());
+				}
 			}
 		}
 
