@@ -32,8 +32,8 @@ impl<'a> ChartBuffer<'a> {
 			panic!("incorrectly initialized chart buffer! size must be width * height * 3");
 		}
 
-		if max_price > min_price {
-			panic!("max > min... wut?");
+		if max_price < min_price {
+			panic!("max < min... wut?");
 		}
 
 		if timeframe <= 0 {

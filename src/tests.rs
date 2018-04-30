@@ -18,6 +18,7 @@ fn render_options_modification() {
 			v_axis_options: AxisOptions::new(),
 			down_colour: 0x69696969,
 			up_colour: 0x69696970,
+			render_extensions: vec![],
 		},
 		OHLCRenderOptions::new()
 			.indicator_colours(0x69696968, 0x69696969, 0x69696970)
