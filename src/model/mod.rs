@@ -1,7 +1,5 @@
 use std::mem;
 
-mod bollinger_bands;
-
 pub type Point = (usize, usize);
 
 pub struct Margin {
@@ -119,8 +117,8 @@ impl<'a> ChartBuffer<'a> {
 		let rise = p2.1 - p1.1;
 		let gradient = rise as f64 / run as f64;
 
-		let mut y = y1 as f64;
-		for x in x1..(x2 + 1) {
+		let mut y = p1.1 as f64;
+		for x in p1.0..(p2.0 + 1) {
 			y += gradient;
 			let y = y.round() as usize;
 
