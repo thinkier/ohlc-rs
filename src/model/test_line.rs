@@ -7,12 +7,12 @@ pub struct TestLine;
 
 impl RendererExtension for TestLine {
 	fn apply(&self, buffer: &mut ChartBuffer, _data: &[OHLC]) {
-		buffer.line((0, 0), (1310, 650), 0xFFFF00FF);
-		buffer.line((0, 650), (1310, 0), 0xFFFF00FF);
-		buffer.line((0, 0), (0, 650), 0xFFFF00FF);
-		buffer.line((0, 650), (1310, 650), 0xFFFF00FF);
-		buffer.line((1310, 650), (1310, 0), 0xFFFF00FF);
-		buffer.line((0, 0), (1310, 0), 0xFFFF00FF);
+		buffer.line((0, 0), (1309, 649), 0xFFFF00FF);
+		buffer.line((0, 649), (1309, 0), 0xFFFF00FF);
+		buffer.line((0, 0), (0, 649), 0xFFFF00FF);
+		buffer.line((0, 649), (1309, 649), 0xFFFF00FF);
+		buffer.line((1309, 649), (1309, 0), 0xFFFF00FF);
+		buffer.line((0, 0), (1309, 0), 0xFFFF00FF);
 	}
 
 	fn name(&self) -> String {

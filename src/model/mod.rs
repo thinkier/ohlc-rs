@@ -90,7 +90,7 @@ impl<'a> ChartBuffer<'a> {
 	}
 
 	/// Render a rectangle by the diagonally opposite points and colour
-	pub fn rect_point(&mut self, mut p1: Point, mut p2: Point, rgba: u32) {
+	pub fn rect_point(&mut self, p1: Point, p2: Point, rgba: u32) {
 		self.rect(p1.0, p1.1, p2.0, p2.1, rgba);
 	}
 
