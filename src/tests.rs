@@ -202,7 +202,7 @@ fn render_draw_sample_data_with_test_fill_with_alpha() {
 }
 
 #[test]
-fn render_draw_sample_data_with_test_thicc_line() {
+fn render_draw_sample_data_with_test_line() {
 	let _ = env_logger::try_init();
 
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
