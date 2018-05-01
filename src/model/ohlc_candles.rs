@@ -17,23 +17,26 @@ impl OHLCCandles {
 impl RendererExtension for OHLCCandles {
 	fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
 		let period = buffer.timeframe / data.len() as i64;
+		let period_addition = 4. * period as f64 / 5.;
 
 		for i in 0..data.len() {
 			let ohlc = data[i];
 
 			let colour = if ohlc.o > ohlc.c { self.down_colour } else { self.up_colour };
 
+			// Main big block
 			{
 				let p1 = buffer.data_to_coords(ohlc.o, period * i as i64);
-				let p2 = buffer.data_to_coords(ohlc.c, period * (i as i64 + 1) - 1);
+				let mut p2 = buffer.data_to_coords(ohlc.c, ((period * (i as i64)) as f64 + period_addition) as i64);
 
 				buffer.rect_point(p1, p2, colour);
 			}
 
+			// Sticks
 			{
-				let time = period * i as i64 + (period / 2);
-				let p1 = buffer.data_to_coords(ohlc.h, time - (period / 8));
-				let p2 = buffer.data_to_coords(ohlc.l, time + (period / 8));
+				let time = period * i as i64 + (period_addition / 2.) as i64;
+				let p1 = buffer.data_to_coords(ohlc.h, time - (period_addition / 12.).ceil() as i64);
+				let p2 = buffer.data_to_coords(ohlc.l, time + (period_addition / 12.).floor() as i64);
 
 				buffer.rect_point(p1, p2, colour);
 			}

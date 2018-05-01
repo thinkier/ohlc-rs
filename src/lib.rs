@@ -8,6 +8,7 @@ extern crate tempdir;
 use api::RendererExtension;
 pub use data::*;
 use model::*;
+use model::grid_lines::GridLines;
 use model::ohlc_candles::OHLCCandles;
 pub use options::*;
 use std::collections::hash_map::DefaultHasher;
@@ -209,78 +210,11 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			debug!("Populated background @ {:?}", start_time.elapsed());
 		}
 
-		// Width of the "candle" in the candlestick chart
-		let candle_width = ((width - (margin_left + margin_right)) as f64 / data.len() as f64).floor();
-
 		// Defines how much the Y value should increment for every unit of the OHLC supplied
 		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
 
 		#[cfg(test)] {
 			debug!("Calculated candle data @ {:?}", start_time.elapsed());
-		}
-
-		// Rendering the horizontal (price) lines occur here
-		if self.v_axis_options.line_colour % 256 > 0 && self.v_axis_options.line_frequency > 0. {
-			for y_es in 0..(height - (margin_top + margin_bottom)) {
-				if (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.line_frequency) {
-					let y = y_es + margin_top;
-					for x in margin_left..(width - margin_right) {
-						colour_rgba(&mut image_buffer, width, x, y, self.v_axis_options.line_colour);
-					}
-				}
-
-				// Rendering text for the lines occur here
-				if self.v_axis_options.label_colour % 256 > 0 && (|d| d < y_val_increment && d >= 0.)((ohlc_of_set.h - y_es as f64 * y_val_increment) % self.v_axis_options.label_frequency) {
-					let base_y = y_es + margin_top - 8; // Top edge...
-
-					let mut chars = format!("{}{:.8}{}", self.value_prefix, ((ohlc_of_set.h - y_es as f64 * y_val_increment) / self.v_axis_options.label_frequency).round() * self.v_axis_options.label_frequency, self.value_suffix).into_bytes();
-
-					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
-						let _ = chars.pop();
-					}
-					text_renders.push((chars, width - margin_right + 10, base_y, self.v_axis_options.label_colour, false))
-				}
-			}
-		}
-
-		#[cfg(test)] {
-			debug!("Rendered horizontal lines (price ticks) @ {:?}", start_time.elapsed());
-		}
-
-		// Rendering the vertical (time) lines occur here
-		if self.h_axis_options.line_colour % 256 > 0 && self.h_axis_options.line_frequency > 0. {
-			let data_len = data.len();
-
-			let line_count = (data_len as f64 / self.h_axis_options.line_frequency).round() as usize + 1;
-			let line_interval = (candle_width * self.h_axis_options.line_frequency).round() as usize;
-			let label_count = (data_len as f64 / self.h_axis_options.label_frequency).round() as usize + 1;
-			let label_interval = (candle_width * self.h_axis_options.label_frequency).round() as usize;
-
-			for x_idx in 0..line_count {
-				let x = x_idx * line_interval + margin_left;
-
-				for y in margin_top..(height - margin_bottom) {
-					colour_rgba(&mut image_buffer, width, x, y, self.h_axis_options.line_colour);
-				}
-			}
-
-			// Rendering text for the lines occur here
-			for x_idx in 0..label_count {
-				let x = x_idx * label_interval + margin_left;
-
-				if self.h_axis_options.label_colour % 256 > 0 && self.h_axis_options.label_frequency > 0. {
-					let mut chars = duration_string((self.time_units as f64 * self.h_axis_options.label_frequency * (label_count - x_idx - 1) as f64).round() as u64).into_bytes();
-
-					while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
-						let _ = chars.pop();
-					}
-					text_renders.push((chars, x - 10, height - margin_bottom + 5, self.h_axis_options.label_colour, false))
-				}
-			}
-		}
-
-		#[cfg(test)] {
-			debug!("Rendered vertical lines (time ticks) @ {:?}", start_time.elapsed());
 		}
 
 		{
@@ -291,11 +225,17 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 				right: margin_right,
 			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, &mut image_buffer[..]);
 
-			OHLCCandles::new(self.up_colour, self.down_colour).apply(&mut chart_buffer, &data[..]);
-		}
+			GridLines::new(
+				self.h_axis_options.line_colour,
+				true,
+				200.,
+				86400).apply(&mut chart_buffer, &data[..]);
 
-		#[cfg(test)] {
-			debug!("Rendered candles @ {:?}", start_time.elapsed());
+			OHLCCandles::new(self.up_colour, self.down_colour).apply(&mut chart_buffer, &data[..]);
+
+			#[cfg(test)] {
+				debug!("Rendered candles @ {:?}", start_time.elapsed());
+			}
 		}
 
 		// Current, lowest, highest value line is rendered inside here.

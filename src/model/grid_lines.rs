@@ -21,7 +21,9 @@ impl RendererExtension for GridLines {
 		{
 			let mut price = buffer.min_price;
 			while price <= buffer.max_price {
-				buffer.line(buffer.data_to_coords(price, 0), buffer.data_to_coords(price, buffer.timeframe), self.colour);
+				let p1 = buffer.data_to_coords(price, 0);
+				let p2 = buffer.data_to_coords(price, buffer.timeframe);
+				buffer.line(p1, p2, self.colour);
 
 				price += self.price_interval;
 			}
@@ -30,7 +32,9 @@ impl RendererExtension for GridLines {
 		{
 			let mut time = 0;
 			while time <= buffer.timeframe {
-				buffer.line(buffer.data_to_coords(buffer.min_price, time), buffer.data_to_coords(buffer.max_price, time), self.colour);
+				let p1 = buffer.data_to_coords(buffer.min_price, time);
+				let p2 = buffer.data_to_coords(buffer.max_price, time);
+				buffer.line(p1, p2, self.colour);
 
 				time += self.time_interval;
 			}
