@@ -125,7 +125,7 @@ fn render_draw_sample_data_with_bb() {
 	let _ = env_logger::try_init();
 
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
-	let bb = BollingerBand::new(20, 2, 0x0000FFFF);
+	let bb = BollingerBands::new(20, 2, 0x0000FFFF);
 	{
 		let options = OHLCRenderOptions::new(bb)
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)

@@ -10,19 +10,19 @@ struct BandPoints {
 }
 
 #[derive(Debug)]
-pub struct BollingerBand {
+pub struct BollingerBands {
 	periods: usize,
 	standard_deviations: usize,
 	line_colour: u32,
 }
 
-impl BollingerBand {
-	pub fn new(periods: usize, standard_deviations: usize, line_colour: u32) -> BollingerBand {
-		BollingerBand { periods, standard_deviations, line_colour }
+impl BollingerBands {
+	pub fn new(periods: usize, standard_deviations: usize, line_colour: u32) -> BollingerBands {
+		BollingerBands { periods, standard_deviations, line_colour }
 	}
 }
 
-impl RendererExtension for BollingerBand {
+impl RendererExtension for BollingerBands {
 	fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
 		let half_period = self.periods / 2;
 
