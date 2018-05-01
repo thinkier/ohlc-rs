@@ -8,6 +8,7 @@ extern crate tempdir;
 use api::RendererExtension;
 pub use data::*;
 use model::*;
+use model::ohlc_candles::OHLCCandles;
 pub use options::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -15,7 +16,6 @@ use std::path::*;
 use std::time::SystemTime;
 use tempdir::*;
 pub use utils::*;
-
 
 pub mod api;
 pub mod data;
@@ -211,8 +211,6 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 
 		// Width of the "candle" in the candlestick chart
 		let candle_width = ((width - (margin_left + margin_right)) as f64 / data.len() as f64).floor();
-		// Width of the "stick" component in the candlestick chart
-		let stick_width = (|x| if x < 1 || candle_width <= 5. { 1 } else { x })((candle_width / 10. + 0.3).round() as usize);
 
 		// Defines how much the Y value should increment for every unit of the OHLC supplied
 		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
@@ -285,48 +283,15 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			debug!("Rendered vertical lines (time ticks) @ {:?}", start_time.elapsed());
 		}
 
-		// The below section renders the OHLC candles
-		for (i, ohlc_elem) in data.iter().enumerate() {
-			let colour = if ohlc_elem.o > ohlc_elem.c { self.down_colour } else { self.up_colour };
+		{
+			let mut chart_buffer = ChartBuffer::new(width, height, Margin {
+				top: margin_top,
+				bottom: margin_bottom,
+				left: margin_left,
+				right: margin_right,
+			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, &mut image_buffer[..]);
 
-			// Yes, no left margin
-			let begin_pos = (candle_width * i as f64) as usize + margin_left;
-			let end_pos = (candle_width * (i + 1) as f64) as usize + margin_left;
-
-			let open_ys = ((ohlc_elem.o - ohlc_of_set.l) / y_val_increment).round() as usize;
-			let close_ys = ((ohlc_elem.c - ohlc_of_set.l) / y_val_increment).round() as usize;
-
-			let x_center = (((begin_pos + end_pos) as f64) / 2.).round() as usize;
-
-			// Candles are rendered inside here
-			for y_state in if open_ys > close_ys { close_ys..(1 + open_ys) } else { open_ys..(1 + close_ys) } {
-				let y = height - y_state - margin_bottom;
-				// Introduce right padding if the candle isn't too short
-				for x in begin_pos..(if end_pos - begin_pos > 3 { end_pos - 1 } else { end_pos + 1 }) {
-					colour_rgba(&mut image_buffer, width, x, y, colour);
-				}
-			}
-
-			// Sticks and rendered inside here
-			for y_state in (((ohlc_elem.l - ohlc_of_set.l) / y_val_increment).round() as usize)..(1 + ((ohlc_elem.h - ohlc_of_set.l) / y_val_increment).round() as usize) {
-				let y = height - y_state - margin_bottom;
-
-				for x in (x_center - stick_width - 1) as usize..(x_center + stick_width - 1) as usize {
-					colour_rgba(&mut image_buffer, width, x, y, colour);
-				}
-			}
-
-			// Render the star for the current price line
-			if i == data.len() - 1 {
-				let y = height - (((ohlc_of_set.c - ohlc_of_set.l) / y_val_increment).round() as usize) - margin_bottom;
-				for x_offset in -2i32..3 {
-					for y_offset in -2i32..3 {
-						if !(x_offset == y_offset || x_offset + y_offset == 0 || x_offset == 0) { continue; }
-
-						colour_rgba(&mut image_buffer, width, (x_offset + (x_center as i32)) as usize, (y_offset + (y as i32)) as usize, self.current_value_colour);
-					}
-				}
-			}
+			OHLCCandles::new(self.up_colour, self.down_colour).apply(&mut chart_buffer, &data[..]);
 		}
 
 		#[cfg(test)] {
