@@ -223,7 +223,7 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 				bottom: margin_bottom,
 				left: margin_left,
 				right: margin_right,
-			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, &mut image_buffer[..]);
+			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour, &mut image_buffer[..]);
 
 			GridLines::new(
 				self.h_axis_options.line_colour,
@@ -326,7 +326,7 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 				bottom: margin_bottom,
 				left: margin_left,
 				right: margin_right,
-			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, &mut image_buffer[..]);
+			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour,&mut image_buffer[..]);
 
 			self.render_extension.apply(&mut ch_buffer, &data[..]);
 

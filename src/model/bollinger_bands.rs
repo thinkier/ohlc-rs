@@ -42,11 +42,11 @@ impl RendererExtension for BollingerBands {
 			let data_slice = &data[min..max];
 			let medians = into_median(data_slice);
 			let scaled_std_dev = std_dev(&medians[..]) * self.standard_deviations as f64;
-			let median_of_current = middle_of_ohlc(data[i]);
+			let moving_avg = avg(&medians[..]);
 			let points = BandPoints {
-				higher: median_of_current + scaled_std_dev,
-				median: median_of_current,
-				lower: median_of_current - scaled_std_dev,
+				higher: moving_avg + scaled_std_dev,
+				median: moving_avg,
+				lower: moving_avg - scaled_std_dev,
 			};
 
 			bands.push(points);

@@ -34,12 +34,14 @@ pub struct ChartBuffer<'a> {
 	min_price: f64,
 	/// The amount of time the graph covers, in seconds
 	timeframe: i64,
+	/// Default background colour, alpha channel is ignored
+	background: u32,
 	/// Byte buffer of the actual image
 	pub buffer: &'a mut [u8],
 }
 
 impl<'a> ChartBuffer<'a> {
-	pub(crate) fn new(width: usize, height: usize, margin: Margin, max_price: f64, min_price: f64, timeframe: i64, buffer: &'a mut [u8]) -> ChartBuffer {
+	pub(crate) fn new(width: usize, height: usize, margin: Margin, max_price: f64, min_price: f64, timeframe: i64, background: u32, buffer: &'a mut [u8]) -> ChartBuffer {
 		if buffer.len() != width * height * 3 {
 			panic!("incorrectly initialized chart buffer! size must be width * height * 3");
 		}
@@ -56,7 +58,7 @@ impl<'a> ChartBuffer<'a> {
 			panic!("margins cannot be bigger than the image itself")
 		}
 
-		ChartBuffer { width, height, margin, max_price, min_price, timeframe, buffer }
+		ChartBuffer { width, height, margin, max_price, min_price, timeframe, background: background | 0xFF, buffer }
 	}
 
 	/// Returns: (x, y)
@@ -183,6 +185,21 @@ impl<'a> ChartBuffer<'a> {
 				}
 			}
 		}
+	}
+
+	pub fn text_with_outline(&mut self, min: Point, text: &str, rgba: u32) {
+		let count = text.as_bytes().len();
+		for delta_x in 0..count * 10 + 2 {
+			let x = min.0 + delta_x;
+			for delta_y in 0..19 {
+				let y = min.1 + delta_y;
+
+				let colour = if delta_y == 0 || delta_x == 0 || delta_x == count * 10 + 1 || delta_y == 18 { rgba } else { self.background };
+				self.colour(x, y, colour);
+			}
+		}
+
+		self.text((min.0 + 1, min.1 + 1), text, rgba);
 	}
 
 	pub fn distance(x1: usize, x2: usize) -> isize {
