@@ -152,7 +152,7 @@ fn render_draw_sample_data_with_test_fill() {
 	let _ = env_logger::try_init();
 
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
-	let tf = TestFill {};
+	let tf = TestFill { colour: 0xFFFF00FF };
 	{
 		let options = OHLCRenderOptions::new(tf)
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
@@ -179,10 +179,10 @@ fn render_draw_sample_data_with_test_fill_with_alpha() {
 	let _ = env_logger::try_init();
 
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
-	let tf = TestFill {};
+	let tf = TestFill { colour: 0xFFFF007F };
 	{
 		let options = OHLCRenderOptions::new(tf)
-			.title("BTCUSD | ohlc-rs", 0x007F7F7F)
+			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.v_axis(|va| va
 				.line(0xCCCCCCFF, 200.)
 				.label(0x222222FF, 200.)

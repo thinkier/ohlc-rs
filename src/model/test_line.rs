@@ -12,7 +12,7 @@ impl RendererExtension for TestLine {
 	}
 
 	fn name(&self) -> String {
-		"NoExtension()".to_string()
+		"TEST_Line()".to_string()
 	}
 }
 

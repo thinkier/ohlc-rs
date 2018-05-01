@@ -3,15 +3,17 @@ use data::OHLC;
 use model::ChartBuffer;
 
 #[derive(Debug)]
-pub struct TestFill;
+pub struct TestFill {
+	pub colour: u32
+}
 
 impl RendererExtension for TestFill {
 	fn apply(&self, buffer: &mut ChartBuffer, _data: &[OHLC]) {
-		buffer.rect(0, 0, 200, 200, 0xFFFF00FF);
+		buffer.rect(0, 0, 200, 200, self.colour);
 	}
 
 	fn name(&self) -> String {
-		"NoExtension()".to_string()
+		"TEST_Fill()".to_string()
 	}
 }
 

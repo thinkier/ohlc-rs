@@ -138,15 +138,22 @@ impl<'a> ChartBuffer<'a> {
 			return;
 		}
 
-		let alpha = rgba as u8;
+		// Weird casts because I wanna strip the first 24 bits
+		let alpha = (rgba as u8) as f64 / 255.;
 
 		for j in 0..3 {
 			let i = (x + y * self.width) * 3 + j;
-			let colour = (rgba >> (24 - 8 * j)) as u8;
 
-			let bgc = self.buffer[i];
+			let applied_colour = {
+				let colour = (rgba >> (24 - 8 * j)) as u8;
+				if alpha >= 0.96 { // Lazy if opacity is >= 96%
+					colour
+				} else {
+					let bgc = self.buffer[i];
 
-			let applied_colour = ((((alpha as f64 * colour as f64) + ((255. - alpha as f64) * bgc as f64)) / 255.).round()) as u8;
+					(((alpha * colour as f64) + ((1. - alpha) * bgc as f64)).round()) as u8
+				}
+			};
 
 			self.buffer[i] = applied_colour;
 		}
