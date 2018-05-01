@@ -1,8 +1,9 @@
 use std::mem;
 
 pub mod bollinger_bands;
-pub mod ohlc_candles;
+pub mod grid_lines;
 pub mod no_extension;
+pub mod ohlc_candles;
 #[cfg(test)]
 pub mod test_fill;
 #[cfg(test)]
