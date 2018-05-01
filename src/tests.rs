@@ -114,10 +114,10 @@ fn render_draw_sample_data() {
 		.background_colour(0x36393EFF)
 		.value_strings("$", "");
 
-	let _ = options.render_and_save(
+	options.render_and_save(
 		data.clone(),
 		&Path::new("test-draw-sample-data.png"),
-	);
+	).unwrap();
 }
 
 #[test]
@@ -140,10 +140,37 @@ fn render_draw_sample_data_with_bb() {
 			.background_colour(0x36393EFF)
 			.value_strings("$", "");
 
-		let _ = options.render_and_save(
+		options.render_and_save(
 			data.clone(),
 			&Path::new("test-draw-sample-data+bb.png"),
-		);
+		).unwrap();
+	}
+}
+
+#[test]
+fn render_draw_sample_data_with_test_text() {
+	let _ = env_logger::try_init();
+
+	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
+	let tt = test_text::TestText {};
+	{
+		let options = OHLCRenderOptions::new(tt)
+			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+			.v_axis(|va| va
+				.line(0xCCCCCCFF, 200.)
+				.label(0x222222FF, 200.)
+			)
+			.h_axis(|va| va
+				.line(0xD2D2D2FF, 24.)
+				.label(0x222222FF, 24.)
+			)
+			.background_colour(0x36393EFF)
+			.value_strings("$", "");
+
+		options.render_and_save(
+			data.clone(),
+			&Path::new("test-draw-sample-data+test-text.png"),
+		).unwrap();
 	}
 }
 
@@ -167,10 +194,10 @@ fn render_draw_sample_data_with_test_fill() {
 			.background_colour(0x36393EFF)
 			.value_strings("$", "");
 
-		let _ = options.render_and_save(
+		options.render_and_save(
 			data.clone(),
 			&Path::new("test-draw-sample-data+test-fill.png"),
-		);
+		).unwrap();
 	}
 }
 
@@ -221,9 +248,9 @@ fn render_draw_sample_data_with_test_line() {
 			.background_colour(0x36393EFF)
 			.value_strings("$", "");
 
-		let _ = options.render_and_save(
+		options.render_and_save(
 			data.clone(),
 			&Path::new("test-draw-sample-data+test-line.png"),
-		);
+		).unwrap();
 	}
 }

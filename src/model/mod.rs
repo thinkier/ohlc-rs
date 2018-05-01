@@ -1,3 +1,4 @@
+use fonts::ASCII_TABLE;
 use std::mem;
 
 pub mod bollinger_bands;
@@ -8,6 +9,8 @@ pub mod ohlc_candles;
 pub mod test_fill;
 #[cfg(test)]
 pub mod test_line;
+#[cfg(test)]
+pub mod test_text;
 
 pub type Point = (usize, usize);
 
@@ -155,6 +158,8 @@ impl<'a> ChartBuffer<'a> {
 				let colour = (rgba >> (24 - 8 * j)) as u8;
 				if alpha >= 0.96 { // Lazy if opacity is >= 96%
 					colour
+				} else if alpha <= 0.04 { // Lazy if opacity is <= 4%
+					continue;
 				} else {
 					let bgc = self.buffer[i];
 
@@ -163,6 +168,20 @@ impl<'a> ChartBuffer<'a> {
 			};
 
 			self.buffer[i] = applied_colour;
+		}
+	}
+
+	pub fn text(&mut self, min: Point, text: &str, rgba: u32) {
+		let bytes = text.as_bytes();
+		for i in 0..bytes.len() {
+			let font_face = ASCII_TABLE[(|b| { if b > 127 { 0x20 } else { b } })(bytes[i]) as usize];
+			for delta_x in 0..10 {
+				for delta_y in 0..17 {
+					let a = (((rgba as u8) as f64 / 255.) * font_face[delta_x + delta_y * 10] as f64) as u32;
+					// let a = font_face[delta_x + delta_y * 10] as u32;
+					self.colour(10 * i + min.0 + delta_x, min.1 + delta_y, ((rgba >> 8) << 8) + a);
+				}
+			}
 		}
 	}
 
