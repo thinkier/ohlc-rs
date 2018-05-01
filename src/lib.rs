@@ -213,10 +213,6 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 		// Defines how much the Y value should increment for every unit of the OHLC supplied
 		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
 
-		#[cfg(test)] {
-			debug!("Calculated candle data @ {:?}", start_time.elapsed());
-		}
-
 		{
 			let mut chart_buffer = ChartBuffer::new(width, height, Margin {
 				top: margin_top,
@@ -230,6 +226,10 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 				true,
 				200.,
 				86400).apply(&mut chart_buffer, &data[..]);
+
+			#[cfg(test)] {
+				debug!("Rendered grid lines @ {:?}", start_time.elapsed());
+			}
 
 			OHLCCandles::new(self.up_colour, self.down_colour).apply(&mut chart_buffer, &data[..]);
 
@@ -326,7 +326,7 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 				bottom: margin_bottom,
 				left: margin_left,
 				right: margin_right,
-			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour,&mut image_buffer[..]);
+			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour, &mut image_buffer[..]);
 
 			self.render_extension.apply(&mut ch_buffer, &data[..]);
 
