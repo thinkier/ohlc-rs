@@ -52,9 +52,11 @@ impl RendererExtension for BollingerBand {
 			bands.push(points);
 		}
 
+		let offset = buffer.timeframe / (2 * data.len()) as i64;
+
 		for i in 0..(bands.len() - 1) {
-			let time = (i as i64 * buffer.timeframe / data.len() as i64) as i64;
-			let time_next_period = ((i as i64 + 1) * buffer.timeframe / data.len() as i64) as i64;
+			let time = (i as i64 * buffer.timeframe / data.len() as i64) as i64 + offset;
+			let time_next_period = ((i as i64 + 1) * buffer.timeframe / data.len() as i64) as i64 + offset;
 
 			let p1_h = buffer.data_to_coords(bands[i].higher, time);
 			let p2_h = buffer.data_to_coords(bands[i + 1].higher, time_next_period);
