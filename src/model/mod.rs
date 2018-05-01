@@ -89,6 +89,11 @@ impl<'a> ChartBuffer<'a> {
 		self.colour(x, y, rgba);
 	}
 
+	/// Render a rectangle by the diagonally opposite points and colour
+	pub fn rect_point(&mut self, mut p1: Point, mut p2: Point, rgba: u32) {
+		self.rect(p1.0, p1.1, p2.0, p2.1, rgba);
+	}
+
 	/// Render a rectangle by the min/max x and y points and colour
 	pub fn rect(&mut self, mut x1: usize, mut y1: usize, mut x2: usize, mut y2: usize, rgba: u32) {
 		if x1 > x2 {
