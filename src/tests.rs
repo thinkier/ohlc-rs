@@ -175,6 +175,33 @@ fn render_draw_sample_data_with_test_fill() {
 }
 
 #[test]
+fn render_draw_sample_data_with_test_fill_with_alpha() {
+	let _ = env_logger::try_init();
+
+	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
+	let tf = TestFill {};
+	{
+		let options = OHLCRenderOptions::new(tf)
+			.title("BTCUSD | ohlc-rs", 0x007F7F7F)
+			.v_axis(|va| va
+				.line(0xCCCCCCFF, 200.)
+				.label(0x222222FF, 200.)
+			)
+			.h_axis(|va| va
+				.line(0xD2D2D2FF, 24.)
+				.label(0x222222FF, 24.)
+			)
+			.background_colour(0x36393EFF)
+			.value_strings("$", "");
+
+		let _ = options.render_and_save(
+			data.clone(),
+			&Path::new("test-draw-sample-data+test-fill-with-alpha.png"),
+		);
+	}
+}
+
+#[test]
 fn render_draw_sample_data_with_test_thicc_line() {
 	let _ = env_logger::try_init();
 

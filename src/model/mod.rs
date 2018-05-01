@@ -138,8 +138,17 @@ impl<'a> ChartBuffer<'a> {
 			return;
 		}
 
+		let alpha = rgba as u8;
+
 		for j in 0..3 {
-			self.buffer[(x + y * self.width) * 3 + j] = (rgba >> (24 - 8 * j)) as u8;
+			let i = (x + y * self.width) * 3 + j;
+			let colour = (rgba >> (24 - 8 * j)) as u8;
+
+			let bgc = self.buffer[i];
+
+			let applied_colour = ((((alpha as f64 * colour as f64) + ((255. - alpha as f64) * bgc as f64)) / 255.).round()) as u8;
+
+			self.buffer[i] = applied_colour;
 		}
 	}
 
