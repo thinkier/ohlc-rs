@@ -1,4 +1,9 @@
 use fonts::ASCII_TABLE;
+pub use self::basic_indicative_lines::BasicIndicativeLines;
+pub use self::bollinger_bands::BollingerBands;
+pub use self::grid_lines::GridLines;
+pub use self::no_extension::NoExtension;
+pub use self::ohlc_candles::OHLCCandles;
 use std::mem;
 
 pub mod basic_indicative_lines;

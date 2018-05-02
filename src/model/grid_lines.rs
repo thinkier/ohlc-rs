@@ -60,8 +60,5 @@ impl RendererExtension for GridLines {
 }
 
 fn round_start_price(buffer: &ChartBuffer, interval: f64) -> f64 {
-	let window = buffer.max_price - buffer.min_price;
-	let count = (window / interval).floor();
-
 	buffer.min_price + interval - (buffer.min_price % interval)
 }
