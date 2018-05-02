@@ -1,5 +1,4 @@
 use super::*;
-use super::*;
 
 pub fn calculate_ohlc_of_set(data: &[OHLC]) -> OHLC {
 	let mut ohlc = OHLC::new();
@@ -73,6 +72,8 @@ pub fn duration_string(elapsed: u64) -> String {
 
 	elapsed_str
 }
+
+use super::*;
 
 #[cfg(test)]
 mod tests {
