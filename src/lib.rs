@@ -11,7 +11,6 @@ use model::*;
 use model::basic_indicative_lines::BasicIndicativeLines;
 use model::grid_lines::GridLines;
 use model::ohlc_candles::OHLCCandles;
-pub use options::*;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::*;
@@ -23,7 +22,6 @@ pub mod api;
 pub mod data;
 mod fonts;
 pub mod model;
-pub mod options;
 #[cfg(test)]
 mod tests;
 pub mod utils;
@@ -39,21 +37,19 @@ pub struct OHLCRenderOptions<RE: RendererExtension + Sized> {
 	pub background_colour: u32,
 	/// Colour for the "current value" dot and line across the chart
 	pub current_value_colour: u32,
-	/// The prefix for the values represented in the OHLC
-	pub value_prefix: String,
-	/// The suffix for the values represented in the OHLC
-	pub value_suffix: String,
 	/// The amount of time, in seconds, each OHLC objects represent
 	pub time_units: u64,
-	/// Options for the horizontal axis
-	pub h_axis_options: AxisOptions,
-	/// Options for the vertical axis
-	pub v_axis_options: AxisOptions,
+	/// Colour for axes labels and grid lines
+	pub line_colour: u32,
+	/// Intervals for drawing price lines in currency units
+	pub price_line_interval: f64,
+	/// Intervals for time lines in time_units
+	pub time_line_interval: i64,
 	/// RGBA(8) Colour for when the OHLC indicates fall
 	pub down_colour: u32,
 	/// RGBA(8) Colour for when the OHLC indicates rise
 	pub up_colour: u32,
-	/// Render extension
+	/// Additional rendering extensions
 	pub(crate) render_extension: RE,
 }
 
@@ -65,12 +61,11 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			title_colour: 0,
 			background_colour: 0xDDDDDDFF,
 			current_value_colour: 0x2E44EAFF,
-			value_prefix: String::new(),
-			value_suffix: String::new(),
 			// Default is 1 hour
 			time_units: 3600,
-			h_axis_options: AxisOptions::new(),
-			v_axis_options: AxisOptions::new(),
+			line_colour: 0xFFFFFFAA,
+			price_line_interval: 1.0,
+			time_line_interval: 24,
 			down_colour: 0xD33040FF,
 			up_colour: 0x27A819FF,
 			render_extension,
@@ -92,9 +87,10 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 		self
 	}
 
-	pub fn value_strings(mut self, prefix: &str, suffix: &str) -> Self {
-		self.value_prefix = prefix.to_string();
-		self.value_suffix = suffix.to_string();
+	pub fn line(mut self, colour: u32, price_interval: f64, time_interval: u64) -> Self {
+		self.line_colour = colour;
+		self.price_line_interval = price_interval;
+		self.time_line_interval = time_interval as i64;
 
 		self
 	}
@@ -107,20 +103,6 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 
 	pub fn time_units(mut self, time_units: u64) -> Self {
 		self.time_units = time_units;
-
-		self
-	}
-
-	pub fn h_axis<F>(mut self, mut f: F) -> Self
-		where F: FnMut(AxisOptions) -> AxisOptions {
-		self.h_axis_options = (f)(self.h_axis_options);
-
-		self
-	}
-
-	pub fn v_axis<F>(mut self, mut f: F) -> Self
-		where F: FnMut(AxisOptions) -> AxisOptions {
-		self.v_axis_options = (f)(self.v_axis_options);
 
 		self
 	}
@@ -217,10 +199,10 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour, &mut image_buffer[..]);
 
 			GridLines::new(
-				self.h_axis_options.line_colour,
+				self.line_colour,
 				true,
-				200.,
-				86400).apply(&mut chart_buffer, &data[..]);
+				self.price_line_interval,
+				self.time_line_interval * self.time_units as i64).apply(&mut chart_buffer, &data[..]);
 
 			#[cfg(test)] {
 				debug!("Rendered grid lines @ {:?}", start_time.elapsed());
@@ -238,7 +220,7 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 				debug!("Rendered basic indicator lines @ {:?}", start_time.elapsed());
 			}
 
-			chart_buffer.text((8,8), &self.title, self.title_colour);
+			chart_buffer.text((8, 8), &self.title, self.title_colour);
 
 			#[cfg(test)] {
 				debug!("Added title text @ {:?}", start_time.elapsed());

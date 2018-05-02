@@ -15,11 +15,10 @@ fn render_options_modification() {
 			title_colour: 0,
 			background_colour: 0xFEFEFEFF,
 			current_value_colour: 0x69696968,
-			value_prefix: String::new(),
-			value_suffix: String::new(),
 			time_units: 3600,
-			h_axis_options: AxisOptions::new(),
-			v_axis_options: AxisOptions::new(),
+			line_colour: 6969,
+			price_line_interval: 69.69,
+			time_line_interval: 69,
 			down_colour: 0x69696969,
 			up_colour: 0x69696970,
 			render_extension: NoExtension {},
@@ -27,24 +26,7 @@ fn render_options_modification() {
 		OHLCRenderOptions::new(NoExtension {})
 			.indicator_colours(0x69696968, 0x69696969, 0x69696970)
 			.background_colour(0xFEFEFEFF)
-	);
-}
-
-#[test]
-fn axis_options_modification() {
-	assert_eq!(
-		AxisOptions {
-			title: "I'm a meme".to_string(),
-			title_colour: 69,
-			line_colour: 70,
-			line_frequency: 71.,
-			label_colour: 72,
-			label_frequency: 73.,
-		},
-		AxisOptions::new()
-			.title("I'm a meme", 69)
-			.line(70, 71.)
-			.label(72, 73.)
+			.line(6969, 69.69, 69)
 	);
 }
 
@@ -103,16 +85,8 @@ fn render_draw_sample_data() {
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
 	let options = OHLCRenderOptions::new(NoExtension {})
 		.title("BTCUSD | ohlc-rs", 0x007F7FFF)
-		.v_axis(|va| va
-			.line(0xCCCCCCFF, 200.)
-			.label(0x222222FF, 200.)
-		)
-		.h_axis(|va| va
-			.line(0xD2D2D2FF, 24.)
-			.label(0x222222FF, 24.)
-		)
-		.background_colour(0x36393EFF)
-		.value_strings("$", "");
+		.line(0xCCCCCCFF, 200., 24)
+		.background_colour(0x36393EFF);
 
 	options.render_and_save(
 		data.clone(),
@@ -129,16 +103,8 @@ fn render_draw_sample_data_with_bb() {
 	{
 		let options = OHLCRenderOptions::new(bb)
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
-			.v_axis(|va| va
-				.line(0xCCCCCCFF, 200.)
-				.label(0x222222FF, 200.)
-			)
-			.h_axis(|va| va
-				.line(0xD2D2D2FF, 24.)
-				.label(0x222222FF, 24.)
-			)
-			.background_colour(0x36393EFF)
-			.value_strings("$", "");
+			.line(0xCCCCCCFF, 200., 24)
+			.background_colour(0x36393EFF);
 
 		options.render_and_save(
 			data.clone(),
@@ -156,16 +122,8 @@ fn render_draw_sample_data_with_test_text() {
 	{
 		let options = OHLCRenderOptions::new(tt)
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
-			.v_axis(|va| va
-				.line(0xCCCCCCFF, 200.)
-				.label(0x222222FF, 200.)
-			)
-			.h_axis(|va| va
-				.line(0xD2D2D2FF, 24.)
-				.label(0x222222FF, 24.)
-			)
-			.background_colour(0x36393EFF)
-			.value_strings("$", "");
+			.line(0xCCCCCCFF, 200., 24)
+			.background_colour(0x36393EFF);
 
 		options.render_and_save(
 			data.clone(),
@@ -183,16 +141,8 @@ fn render_draw_sample_data_with_test_fill() {
 	{
 		let options = OHLCRenderOptions::new(tf)
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
-			.v_axis(|va| va
-				.line(0xCCCCCCFF, 200.)
-				.label(0x222222FF, 200.)
-			)
-			.h_axis(|va| va
-				.line(0xD2D2D2FF, 24.)
-				.label(0x222222FF, 24.)
-			)
-			.background_colour(0x36393EFF)
-			.value_strings("$", "");
+			.line(0xCCCCCCFF, 200., 24)
+			.background_colour(0x36393EFF);
 
 		options.render_and_save(
 			data.clone(),
@@ -210,16 +160,8 @@ fn render_draw_sample_data_with_test_fill_with_alpha() {
 	{
 		let options = OHLCRenderOptions::new(tf)
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
-			.v_axis(|va| va
-				.line(0xCCCCCCFF, 200.)
-				.label(0x222222FF, 200.)
-			)
-			.h_axis(|va| va
-				.line(0xD2D2D2FF, 24.)
-				.label(0x222222FF, 24.)
-			)
-			.background_colour(0x36393EFF)
-			.value_strings("$", "");
+			.line(0xCCCCCCFF, 200., 24)
+			.background_colour(0x36393EFF);
 
 		let _ = options.render_and_save(
 			data.clone(),
@@ -237,16 +179,8 @@ fn render_draw_sample_data_with_test_line() {
 	{
 		let options = OHLCRenderOptions::new(ttl)
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
-			.v_axis(|va| va
-				.line(0xCCCCCCFF, 200.)
-				.label(0x222222FF, 200.)
-			)
-			.h_axis(|va| va
-				.line(0xD2D2D2FF, 24.)
-				.label(0x222222FF, 24.)
-			)
-			.background_colour(0x36393EFF)
-			.value_strings("$", "");
+			.line(0xCCCCCCFF, 200., 24)
+			.background_colour(0x36393EFF);
 
 		options.render_and_save(
 			data.clone(),
