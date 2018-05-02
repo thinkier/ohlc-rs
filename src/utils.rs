@@ -1,6 +1,7 @@
 use super::*;
+use super::*;
 
-pub fn calculate_ohlc_of_set(data: &Vec<OHLC>) -> OHLC {
+pub fn calculate_ohlc_of_set(data: &[OHLC]) -> OHLC {
 	let mut ohlc = OHLC::new();
 
 	if data.len() == 0 {
@@ -75,8 +76,6 @@ pub fn duration_string(elapsed: u64) -> String {
 
 #[cfg(test)]
 mod tests {
-	use super::*;
-
 	#[test]
 	fn duration_test() {
 		assert_eq!(duration_string(1), "Now");

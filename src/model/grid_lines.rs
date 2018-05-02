@@ -26,7 +26,7 @@ impl RendererExtension for GridLines {
 				let p2 = buffer.data_to_coords(price, buffer.timeframe);
 				buffer.line(p1, p2, self.colour);
 				if self.label {
-					buffer.text((p2.0 + 3, p2.1 - 10), &format!("{:.8}", price), self.colour);
+					buffer.text((p2.0 + 4, p2.1 - 8), &format!("{:.8}", price), self.colour);
 				}
 
 				price += self.price_interval;

@@ -8,6 +8,7 @@ extern crate tempdir;
 use api::RendererExtension;
 pub use data::*;
 use model::*;
+use model::basic_indicative_lines::BasicIndicativeLines;
 use model::grid_lines::GridLines;
 use model::ohlc_candles::OHLCCandles;
 pub use options::*;
@@ -165,10 +166,7 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			debug!("Validated input data @ {:?}", start_time.elapsed());
 		}
 
-		// String.bytes, top edge x, leftmost edge y, colour, do a border
-		let mut text_renders: Vec<(Vec<u8>, usize, usize, u32, bool)> = vec![];
-
-		let ohlc_of_set = calculate_ohlc_of_set(&data);
+		let ohlc_of_set = calculate_ohlc_of_set(&data[..]);
 
 		let margin_top = 60;
 		let margin_bottom = 35;
@@ -210,9 +208,6 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			debug!("Populated background @ {:?}", start_time.elapsed());
 		}
 
-		// Defines how much the Y value should increment for every unit of the OHLC supplied
-		let y_val_increment = ohlc_of_set.range() / (height - (margin_top + margin_bottom)) as f64;
-
 		{
 			let mut chart_buffer = ChartBuffer::new(width, height, Margin {
 				top: margin_top,
@@ -236,99 +231,20 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			#[cfg(test)] {
 				debug!("Rendered candles @ {:?}", start_time.elapsed());
 			}
-		}
 
-		// Current, lowest, highest value line is rendered inside here.
-		for (val, colour) in vec![(ohlc_of_set.l, self.down_colour), (ohlc_of_set.h, self.up_colour), (ohlc_of_set.c, self.current_value_colour)] {
-			let y = height - (((val - ohlc_of_set.l) / y_val_increment).round() as usize) - margin_bottom;
-			for half_x in (margin_left / 2)..((width - margin_right) / 2) {
-				colour_rgba(&mut image_buffer, width, half_x * 2, y, colour);
+			BasicIndicativeLines::new(self.up_colour, self.down_colour, self.current_value_colour).apply(&mut chart_buffer, &data[..]);
+
+			#[cfg(test)] {
+				debug!("Rendered basic indicator lines @ {:?}", start_time.elapsed());
 			}
 
-			// Add label
-			{
-				let mut chars = format!("{}{:.8}{}", self.value_prefix, val, self.value_suffix).into_bytes();
+			chart_buffer.text((8,8), &self.title, self.title_colour);
 
-				while chars.len() > ((margin_right as f32 - 10.) / 10.).floor() as usize {
-					let _ = chars.pop();
-				}
-				text_renders.push((chars, width - margin_right + 10, y - 8, colour, true))
-			}
-		}
-
-		#[cfg(test)] {
-			debug!("Rendered basic indicator lines @ {:?}", start_time.elapsed());
-		}
-
-		// Add title text
-		text_renders.push((self.title.clone().into_bytes(), 8, 8, self.title_colour, false));
-
-		// Text renderer section
-		for (chars, base_x, base_y, colour, do_border) in text_renders {
-			let chars_len = chars.len();
-
-			if do_border {
-				for x in (base_x - 1)..(base_x + 10 * chars_len as usize + 1) {
-					for y_mag in 0..2 {
-						let y = base_y + y_mag * 17 + y_mag * 1 - 1;
-
-						colour_rgba(&mut image_buffer, width, x, y, colour);
-					}
-				}
-				for x_mag in 0..2 {
-					let x = base_x + x_mag * 10 * chars_len as usize + x_mag * 2 - 1;
-					for y in (base_y - 1)..(base_y + 17 + 1) {
-						colour_rgba(&mut image_buffer, width, x, y, colour);
-					}
-				}
+			#[cfg(test)] {
+				debug!("Added title text @ {:?}", start_time.elapsed());
 			}
 
-			// 10 is character width; f_x is starting at the left edge of the margin
-			for f_x in 0usize..chars_len {
-				let char_font: &[u8; 170] = &fonts::ASCII_TABLE[chars[(|d| if d < 127 { d } else { 0x20 })(f_x)] as usize];
-				for incr_y in 0usize..17 {
-					for incr_x in 0usize..10 {
-						let x = base_x + (incr_x + f_x * 10) as usize;
-						let y = base_y + incr_y as usize;
-
-						let shade_at_pos = char_font[incr_x + incr_y * 10] as usize;
-
-						if shade_at_pos == 0 {
-							colour_rgba(&mut image_buffer, width, x, y, self.background_colour);
-							continue;
-						}
-
-						// Don't modify the alpha channel
-						for j in 0..3 {
-							let curr_col = (colour >> (24 - 8 * j)) as u8;
-							let bgc = (self.background_colour >> (24 - 8 * j)) as u8;
-
-							image_buffer[(x + y * width) * 3 + j] = (
-								((shade_at_pos * curr_col as usize +
-									// Add the existing background instead of doing alphas
-									((0xff - shade_at_pos) * bgc as usize)
-								) as f64
-									/ 255.
-								).round()) as u8;
-						}
-					}
-				}
-			}
-		}
-
-		#[cfg(test)] {
-			debug!("Rendered all text @ {:?}", start_time.elapsed());
-		}
-
-		{
-			let mut ch_buffer = ChartBuffer::new(width, height, Margin {
-				top: margin_top,
-				bottom: margin_bottom,
-				left: margin_left,
-				right: margin_right,
-			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour, &mut image_buffer[..]);
-
-			self.render_extension.apply(&mut ch_buffer, &data[..]);
+			self.render_extension.apply(&mut chart_buffer, &data[..]);
 
 			#[cfg(test)] {
 				debug!("Rendered extension:{} @ {:?}", self.render_extension.name(), start_time.elapsed());
@@ -371,11 +287,4 @@ fn validate(data: &Vec<OHLC>) -> Result<(), &'static str> {
 		};
 	}
 	Ok(())
-}
-
-/// Colours the pixel with colour supplied by the RGBA field, alpha channel data is ignored.
-fn colour_rgba(buffer: &mut Vec<u8>, width: usize, x: usize, y: usize, rgba: u32) {
-	for j in 0..3 {
-		buffer[(x + y * width) * 3 + j] = (rgba >> (24 - 8 * j)) as u8;
-	}
 }

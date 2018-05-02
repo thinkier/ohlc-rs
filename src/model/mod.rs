@@ -1,6 +1,7 @@
 use fonts::ASCII_TABLE;
 use std::mem;
 
+pub mod basic_indicative_lines;
 pub mod bollinger_bands;
 pub mod grid_lines;
 pub mod no_extension;
