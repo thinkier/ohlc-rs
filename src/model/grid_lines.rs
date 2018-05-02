@@ -25,7 +25,9 @@ impl RendererExtension for GridLines {
 				let p1 = buffer.data_to_coords(price, 0);
 				let p2 = buffer.data_to_coords(price, buffer.timeframe);
 				buffer.line(p1, p2, self.colour);
-				buffer.text((p2.0 + 3, p2.1 - 10), &format!("{:.8}", price), self.colour);
+				if self.label {
+					buffer.text((p2.0 + 3, p2.1 - 10), &format!("{:.8}", price), self.colour);
+				}
 
 				price += self.price_interval;
 			}
@@ -39,9 +41,10 @@ impl RendererExtension for GridLines {
 
 				buffer.line(p1, p2, self.colour);
 
-				let elapsed = format!("{}", duration_string((buffer.timeframe - time) as u64));
-
-				buffer.text((p1.0 - 10, p1.1 + 3), &elapsed, self.colour);
+				if self.label {
+					let elapsed = format!("{}", duration_string((buffer.timeframe - time) as u64));
+					buffer.text((p1.0 - 10, p1.1 + 3), &elapsed, self.colour);
+				}
 
 				time += self.time_interval;
 			}
