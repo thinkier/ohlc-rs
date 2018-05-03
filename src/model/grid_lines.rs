@@ -35,7 +35,7 @@ impl RendererExtension for GridLines {
 
 		{
 			let mut time = buffer.timeframe;
-			for _ in 0..time / self.time_interval {
+			for _ in 0..(time / self.time_interval) + 1 {
 				let p1 = {
 					let point = buffer.data_to_coords(buffer.min_price, time);
 					(point.0, point.1 + 15)
@@ -45,7 +45,7 @@ impl RendererExtension for GridLines {
 				buffer.line(p1, p2, self.colour);
 
 				if self.label {
-					let elapsed = format!("{}", duration_string(time as u64));
+					let elapsed = format!("{}", duration_string((buffer.timeframe - time) as u64));
 					buffer.text((p1.0 - 10, p1.1 + 2), &elapsed, self.colour);
 				}
 
