@@ -149,10 +149,12 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 
 		let ohlc_of_set = calculate_ohlc_of_set(&data[..]);
 
-		let margin_top = 60;
-		let margin_bottom = 35;
-		let margin_left = 12;
-		let margin_right = 113;
+		let margin = Margin {
+			top: 60,
+			bottom: 35,
+			left: 12,
+			right: 113,
+		};
 
 		let width = 1310;
 		let height = 650;
@@ -161,7 +163,7 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			debug!("Initialized variables @ {:?}", start_time.elapsed());
 		}
 
-		let mut image_buffer = vec![(self.background_colour >> 24) as u8; width * height * 3];
+		let mut image_buffer = Vec::with_capacity(width * height * 3);
 
 		#[cfg(test)] {
 			debug!("Allocated vector @ {:?}", start_time.elapsed());
@@ -172,16 +174,10 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			let g = (self.background_colour >> 16) as u8;
 			let b = (self.background_colour >> 8) as u8;
 
-			if r != g || g != b {
-				let colours = [r, g, b];
+			let colours = [r, g, b];
 
-				for y in 0..height {
-					for x in 0..width {
-						for j in 0..3 {
-							image_buffer[(x + y * width) * 3 + j] = colours[j];
-						}
-					}
-				}
+			for xyj in 0..width * height * 3 {
+				image_buffer.push(colours[xyj % 3]);
 			}
 		}
 
@@ -190,12 +186,7 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 		}
 
 		{
-			let mut chart_buffer = ChartBuffer::new(width, height, Margin {
-				top: margin_top,
-				bottom: margin_bottom,
-				left: margin_left,
-				right: margin_right,
-			}, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour, &mut image_buffer[..]);
+			let mut chart_buffer = ChartBuffer::new(width, height, margin, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour, &mut image_buffer[..]);
 
 			GridLines::new(
 				self.line_colour,
