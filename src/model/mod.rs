@@ -1,9 +1,12 @@
+pub use data::OHLC;
 use fonts::ASCII_TABLE;
+pub use OHLCRenderOptions;
 pub use self::basic_indicative_lines::BasicIndicativeLines;
 pub use self::bollinger_bands::BollingerBands;
 pub use self::grid_lines::GridLines;
 pub use self::no_extension::NoExtension;
 pub use self::ohlc_candles::OHLCCandles;
+use std::fmt::Debug;
 use std::mem;
 
 pub mod basic_indicative_lines;
@@ -17,6 +20,19 @@ pub mod test_fill;
 pub mod test_line;
 #[cfg(test)]
 pub mod test_text;
+
+
+pub trait RendererExtension: Debug {
+	fn apply(&self, _buffer: &mut ChartBuffer, _data: &[OHLC]);
+
+	fn name(&self) -> String;
+}
+
+impl PartialEq for RendererExtension {
+	fn eq(&self, other: &RendererExtension) -> bool {
+		self.name() == other.name()
+	}
+}
 
 pub type Point = (usize, usize);
 

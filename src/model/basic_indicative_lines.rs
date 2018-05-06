@@ -1,6 +1,4 @@
-use api::RendererExtension;
-use data::OHLC;
-use model::ChartBuffer;
+use model::*;
 use utils::*;
 
 #[derive(Debug)]

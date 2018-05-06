@@ -1,6 +1,4 @@
-use api::RendererExtension;
-use data::OHLC;
-use model::ChartBuffer;
+use model::*;
 
 #[derive(Debug)]
 pub struct OHLCCandles {

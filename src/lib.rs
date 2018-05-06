@@ -5,12 +5,12 @@ extern crate log;
 extern crate serde_derive;
 extern crate tempdir;
 
-use api::RendererExtension;
 pub use data::*;
 use model::*;
 use model::basic_indicative_lines::BasicIndicativeLines;
 use model::grid_lines::GridLines;
 use model::ohlc_candles::OHLCCandles;
+use model::RendererExtension;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::*;
@@ -18,7 +18,6 @@ use std::time::SystemTime;
 use tempdir::*;
 pub use utils::*;
 
-pub mod api;
 pub mod data;
 mod fonts;
 pub mod model;

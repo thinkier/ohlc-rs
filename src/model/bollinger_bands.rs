@@ -1,5 +1,3 @@
-use api::RendererExtension;
-use data::OHLC;
 use model::*;
 
 #[derive(Debug)]
