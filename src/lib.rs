@@ -11,6 +11,7 @@ use model::basic_indicative_lines::BasicIndicativeLines;
 use model::grid_lines::GridLines;
 use model::ohlc_candles::OHLCCandles;
 use model::RendererExtension;
+use std::boxed::Box;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::*;
@@ -26,8 +27,8 @@ mod tests;
 pub mod utils;
 
 /// OHLC Chart Configuration, mutate through the methods
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct OHLCRenderOptions<RE: RendererExtension + Sized> {
+#[derive(Serialize, Deserialize, Debug)]
+pub struct OHLCRenderOptions {
 	/// Title of the chart
 	pub title: String,
 	/// Colour for the title of the chart
@@ -49,12 +50,13 @@ pub struct OHLCRenderOptions<RE: RendererExtension + Sized> {
 	/// RGBA(8) Colour for when the OHLC indicates rise
 	pub up_colour: u32,
 	/// Additional rendering extensions
-	pub(crate) render_extension: RE,
+	#[serde(skip)]
+	pub(crate) render_extensions: Vec<Box<RendererExtension>>,
 }
 
-impl<RE: RendererExtension> OHLCRenderOptions<RE> {
+impl OHLCRenderOptions {
 	/// Creates an object for render options with default parameters
-	pub fn new(render_extension: RE) -> OHLCRenderOptions<RE> {
+	pub fn new() -> OHLCRenderOptions {
 		OHLCRenderOptions {
 			title: String::new(),
 			title_colour: 0,
@@ -67,7 +69,7 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 			time_line_interval: 24,
 			down_colour: 0xD33040FF,
 			up_colour: 0x27A819FF,
-			render_extension,
+			render_extensions: vec![],
 		}
 	}
 
@@ -102,6 +104,12 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 
 	pub fn time_units(mut self, time_units: u64) -> Self {
 		self.time_units = time_units;
+
+		self
+	}
+
+	pub fn add_extension<RE: RendererExtension + 'static>(mut self, extension: RE) -> Self {
+		self.render_extensions.push(Box::new(extension));
 
 		self
 	}
@@ -159,10 +167,6 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 		let width = 1310;
 		let height = 650;
 
-		#[cfg(test)] {
-			debug!("Initialized variables @ {:?}", start_time.elapsed());
-		}
-
 		let mut image_buffer = Vec::with_capacity(width * height * 3);
 
 		#[cfg(test)] {
@@ -216,10 +220,12 @@ impl<RE: RendererExtension> OHLCRenderOptions<RE> {
 				debug!("Added title text @ {:?}", start_time.elapsed());
 			}
 
-			self.render_extension.apply(&mut chart_buffer, &data[..]);
+			for ext in &self.render_extensions {
+				ext.apply(&mut chart_buffer, &data[..]);
+			}
 
 			#[cfg(test)] {
-				debug!("Rendered extension:{} @ {:?}", self.render_extension.name(), start_time.elapsed());
+				debug!("Rendered extension:{} @ {:?}", self.render_extensions.name(), start_time.elapsed());
 			}
 		}
 

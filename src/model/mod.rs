@@ -28,12 +28,6 @@ pub trait RendererExtension: Debug {
 	fn name(&self) -> String;
 }
 
-impl PartialEq for RendererExtension {
-	fn eq(&self, other: &RendererExtension) -> bool {
-		self.name() == other.name()
-	}
-}
-
 pub type Point = (usize, usize);
 
 pub struct Margin {

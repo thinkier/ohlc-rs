@@ -21,7 +21,7 @@ fn render_options_modification() {
 			time_line_interval: 69,
 			down_colour: 0x69696969,
 			up_colour: 0x69696970,
-			render_extension: NoExtension {},
+			render_extensions: NoExtension {},
 		},
 		OHLCRenderOptions::new(NoExtension {})
 			.indicator_colours(0x69696968, 0x69696969, 0x69696970)

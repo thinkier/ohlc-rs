@@ -1,6 +1,6 @@
 use model::*;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct OHLCCandles {
 	up_colour: u32,
 	down_colour: u32,

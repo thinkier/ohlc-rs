@@ -1,7 +1,7 @@
 use model::*;
 use utils::*;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct BasicIndicativeLines {
 	max_colour: u32,
 	min_colour: u32,

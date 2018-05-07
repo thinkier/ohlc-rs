@@ -7,7 +7,7 @@ struct BandPoints {
 	lower: f64,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct BollingerBands {
 	periods: usize,
 	standard_deviations: usize,

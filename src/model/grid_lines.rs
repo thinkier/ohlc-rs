@@ -1,7 +1,7 @@
 use model::*;
 use utils::duration_string;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct GridLines {
 	colour: u32,
 	label: bool,

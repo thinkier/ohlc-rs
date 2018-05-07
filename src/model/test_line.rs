@@ -1,6 +1,6 @@
 use model::*;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TestLine;
 
 impl RendererExtension for TestLine {
