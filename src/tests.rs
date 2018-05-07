@@ -1,9 +1,9 @@
 extern crate env_logger;
 extern crate serde_json;
 
-use model::bollinger_bands::*;
-use model::test_fill::TestFill;
-use model::test_line::TestLine;
+use model::rex::*;
+use model::rex::test_fill::TestFill;
+use model::rex::test_line::TestLine;
 use super::*;
 
 #[test]

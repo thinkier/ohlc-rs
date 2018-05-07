@@ -7,10 +7,7 @@ extern crate tempdir;
 
 pub use data::*;
 use model::*;
-use model::basic_indicative_lines::BasicIndicativeLines;
-use model::grid_lines::GridLines;
-use model::ohlc_candles::OHLCCandles;
-use model::RendererExtension;
+use model::rex::*;
 use std::boxed::Box;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
@@ -171,58 +168,54 @@ impl OHLCRenderOptions {
 			debug!("Allocated vector @ {:?}", start_time.elapsed());
 		}
 
-		let vec = {
-			let mut chart_buffer = ChartBuffer::new(width, height, margin, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour);
+		let mut chart_buffer = ChartBuffer::new(width, height, margin, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour);
+
+		#[cfg(test)] {
+			debug!("Allocated image and populated background @ {:?}", start_time.elapsed());
+		}
+
+		GridLines::new(
+			self.line_colour,
+			true,
+			self.price_line_interval,
+			self.time_line_interval * self.time_units as i64).apply(&mut chart_buffer, &data[..]);
+
+		#[cfg(test)] {
+			debug!("Rendered grid lines @ {:?}", start_time.elapsed());
+		}
+
+		OHLCCandles::new(self.up_colour, self.down_colour).apply(&mut chart_buffer, &data[..]);
+
+		#[cfg(test)] {
+			debug!("Rendered candles @ {:?}", start_time.elapsed());
+		}
+
+		BasicIndicativeLines::new(self.up_colour, self.down_colour, self.current_value_colour).apply(&mut chart_buffer, &data[..]);
+
+		#[cfg(test)] {
+			debug!("Rendered basic indicator lines @ {:?}", start_time.elapsed());
+		}
+
+		chart_buffer.text((8, 8), &self.title, self.title_colour);
+
+		#[cfg(test)] {
+			debug!("Added title text @ {:?}", start_time.elapsed());
+		}
+
+		for ext in &self.render_extensions {
+			ext.apply(&mut chart_buffer, &data[..]);
 
 			#[cfg(test)] {
-				debug!("Allocated image and populated background @ {:?}", start_time.elapsed());
+				debug!("Rendered extension: {} @ {:?}", ext.name(), start_time.elapsed());
 			}
-
-			GridLines::new(
-				self.line_colour,
-				true,
-				self.price_line_interval,
-				self.time_line_interval * self.time_units as i64).apply(&mut chart_buffer, &data[..]);
-
-			#[cfg(test)] {
-				debug!("Rendered grid lines @ {:?}", start_time.elapsed());
-			}
-
-			OHLCCandles::new(self.up_colour, self.down_colour).apply(&mut chart_buffer, &data[..]);
-
-			#[cfg(test)] {
-				debug!("Rendered candles @ {:?}", start_time.elapsed());
-			}
-
-			BasicIndicativeLines::new(self.up_colour, self.down_colour, self.current_value_colour).apply(&mut chart_buffer, &data[..]);
-
-			#[cfg(test)] {
-				debug!("Rendered basic indicator lines @ {:?}", start_time.elapsed());
-			}
-
-			chart_buffer.text((8, 8), &self.title, self.title_colour);
-
-			#[cfg(test)] {
-				debug!("Added title text @ {:?}", start_time.elapsed());
-			}
-
-			for ext in &self.render_extensions {
-				ext.apply(&mut chart_buffer, &data[..]);
-
-				#[cfg(test)] {
-					debug!("Rendered extension: {} @ {:?}", ext.name(), start_time.elapsed());
-				}
-			}
-
-			chart_buffer.buffer
-		};
+		}
 
 		#[cfg(test)] {
 			debug!("Completed all rendering @ {:?}", start_time.elapsed());
 		}
 
 		// File save occurs here
-		if let Err(err) = image::save_buffer(path, &vec[..], width as u32, height as u32, image::RGB(8)) {
+		if let Err(err) = image::save_buffer(path, &chart_buffer.buffer[..], chart_buffer.width() as u32, chart_buffer.height() as u32, image::RGB(8)) {
 			Err(format!("Image write error: {:?}", err))
 		} else {
 			#[cfg(test)] {
