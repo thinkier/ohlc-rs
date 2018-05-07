@@ -24,8 +24,8 @@ impl RendererExtension for BollingerBands {
 	fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
 		let mut bands = vec![];
 
-		for i in 0..data.len() {
-			let min = if i > self.periods { i - self.periods } else { 0 };
+		for i in self.periods..data.len() {
+			let min = i - self.periods;
 
 			let data_slice = &data[min..i];
 			let medians = into_median(data_slice);
@@ -40,7 +40,7 @@ impl RendererExtension for BollingerBands {
 			bands.push(points);
 		}
 
-		let offset = buffer.timeframe / (2 * data.len()) as i64;
+		let offset = ((self.periods as f64 + 0.5) * (buffer.timeframe as f64) / (data.len() as f64)) as i64;
 
 		for i in 0..(bands.len() - 1) {
 			let time = (i as i64 * buffer.timeframe / data.len() as i64) as i64 + offset;
@@ -69,6 +69,11 @@ impl RendererExtension for BollingerBands {
 }
 
 fn std_dev(prices: &[f64]) -> f64 {
+	let len = prices.len();
+	if len <= 1 {
+		return 0.;
+	}
+
 	let avg = avg(prices);
 	let mut squared_diff_sum = 0.;
 
@@ -76,7 +81,7 @@ fn std_dev(prices: &[f64]) -> f64 {
 		squared_diff_sum += (avg - price).powf(2.);
 	}
 
-	(squared_diff_sum / (prices.len() - 1) as f64).sqrt()
+	(squared_diff_sum / (len - 1) as f64).sqrt()
 }
 
 fn avg(prices: &[f64]) -> f64 {
