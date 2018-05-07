@@ -22,22 +22,12 @@ impl BollingerBands {
 
 impl RendererExtension for BollingerBands {
 	fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
-		let half_period = self.periods / 2;
-
 		let mut bands = vec![];
 
 		for i in 0..data.len() {
-			let min = if i > half_period { i - half_period } else { 0 };
-			let max = {
-				let proto_max = i + half_period + 1;
-				if proto_max >= data.len() {
-					data.len() - 1
-				} else {
-					proto_max
-				}
-			};
+			let min = if i > self.periods { i - self.periods } else { 0 };
 
-			let data_slice = &data[min..max];
+			let data_slice = &data[min..i];
 			let medians = into_median(data_slice);
 			let scaled_std_dev = std_dev(&medians[..]) * self.standard_deviations as f64;
 			let moving_avg = avg(&medians[..]);
