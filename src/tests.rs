@@ -109,7 +109,7 @@ fn render_draw_sample_data_with_test_rsi() {
 	let _ = env_logger::try_init();
 
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
-	let rsi = RSI::new(0xFFFF007F);
+	let rsi = RSI::new(0xCCCCCCFF, 0xFFFF007F, 0x27A819FF, 0xD33040FF);
 	{
 		let options = OHLCRenderOptions::new()
 			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
