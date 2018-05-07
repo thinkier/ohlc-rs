@@ -167,30 +167,16 @@ impl OHLCRenderOptions {
 		let width = 1310;
 		let height = 650;
 
-		let mut image_buffer = Vec::with_capacity(width * height * 3);
-
 		#[cfg(test)] {
 			debug!("Allocated vector @ {:?}", start_time.elapsed());
 		}
 
-		{
-			let r = (self.background_colour >> 24) as u8;
-			let g = (self.background_colour >> 16) as u8;
-			let b = (self.background_colour >> 8) as u8;
+		let vec = {
+			let mut chart_buffer = ChartBuffer::new(width, height, margin, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour);
 
-			let colours = [r, g, b];
-
-			for xyj in 0..width * height * 3 {
-				image_buffer.push(colours[xyj % 3]);
+			#[cfg(test)] {
+				debug!("Allocated image and populated background @ {:?}", start_time.elapsed());
 			}
-		}
-
-		#[cfg(test)] {
-			debug!("Populated background @ {:?}", start_time.elapsed());
-		}
-
-		{
-			let mut chart_buffer = ChartBuffer::new(width, height, margin, ohlc_of_set.h, ohlc_of_set.l, (self.time_units * data.len() as u64) as i64, self.background_colour, &mut image_buffer[..]);
 
 			GridLines::new(
 				self.line_colour,
@@ -222,19 +208,21 @@ impl OHLCRenderOptions {
 
 			for ext in &self.render_extensions {
 				ext.apply(&mut chart_buffer, &data[..]);
+
+				#[cfg(test)] {
+					debug!("Rendered extension: {} @ {:?}", ext.name(), start_time.elapsed());
+				}
 			}
 
-			#[cfg(test)] {
-				debug!("Rendered extension:{} @ {:?}", self.render_extensions.name(), start_time.elapsed());
-			}
-		}
+			chart_buffer.buffer
+		};
 
 		#[cfg(test)] {
 			debug!("Completed all rendering @ {:?}", start_time.elapsed());
 		}
 
 		// File save occurs here
-		if let Err(err) = image::save_buffer(path, &image_buffer[..], width as u32, height as u32, image::RGB(8)) {
+		if let Err(err) = image::save_buffer(path, &vec[..], width as u32, height as u32, image::RGB(8)) {
 			Err(format!("Image write error: {:?}", err))
 		} else {
 			#[cfg(test)] {

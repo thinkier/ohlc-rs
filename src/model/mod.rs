@@ -6,6 +6,7 @@ pub use self::bollinger_bands::BollingerBands;
 pub use self::grid_lines::GridLines;
 pub use self::no_extension::NoExtension;
 pub use self::ohlc_candles::OHLCCandles;
+pub use self::rsi::RSI;
 use std::fmt::Debug;
 use std::mem;
 
@@ -14,6 +15,7 @@ pub mod bollinger_bands;
 pub mod grid_lines;
 pub mod no_extension;
 pub mod ohlc_candles;
+pub mod rsi;
 #[cfg(test)]
 pub mod test_fill;
 #[cfg(test)]
@@ -37,7 +39,7 @@ pub struct Margin {
 	pub right: usize,
 }
 
-pub struct ChartBuffer<'a> {
+pub struct ChartBuffer {
 	/// Total width for the graph - this will be checked against the buffer
 	width: usize,
 	/// Total height for the graph - this will be checked against the buffer
@@ -53,15 +55,11 @@ pub struct ChartBuffer<'a> {
 	/// Default background colour, alpha channel is ignored
 	background: u32,
 	/// Byte buffer of the actual image
-	pub buffer: &'a mut [u8],
+	pub buffer: Vec<u8>,
 }
 
-impl<'a> ChartBuffer<'a> {
-	pub(crate) fn new(width: usize, height: usize, margin: Margin, max_price: f64, min_price: f64, timeframe: i64, background: u32, buffer: &'a mut [u8]) -> ChartBuffer {
-		if buffer.len() != width * height * 3 {
-			panic!("incorrectly initialized chart buffer! size must be width * height * 3");
-		}
-
+impl ChartBuffer {
+	pub(crate) fn new(width: usize, height: usize, margin: Margin, max_price: f64, min_price: f64, timeframe: i64, background: u32) -> ChartBuffer {
 		if max_price < min_price {
 			panic!("max < min... wut?");
 		}
@@ -72,6 +70,20 @@ impl<'a> ChartBuffer<'a> {
 
 		if margin.top + margin.bottom > height || margin.left + margin.right > width {
 			panic!("margins cannot be bigger than the image itself")
+		}
+
+		let mut buffer = Vec::with_capacity(width * height * 3);
+
+		{
+			let r = (background >> 24) as u8;
+			let g = (background >> 16) as u8;
+			let b = (background >> 8) as u8;
+
+			let colours = [r, g, b];
+
+			for xyj in 0..width * height * 3 {
+				buffer.push(colours[xyj % 3]);
+			}
 		}
 
 		ChartBuffer { width, height, margin, max_price, min_price, timeframe, background: background | 0xFF, buffer }
@@ -96,10 +108,14 @@ impl<'a> ChartBuffer<'a> {
 
 			if prog >= 1. {
 				self.margin.top
-			} else if prog <= 0. {
-				self.height - self.margin.bottom
 			} else {
-				self.height - self.margin.bottom - (prog * (self.height - (self.margin.top + self.margin.bottom)) as f64) as usize
+				let bottom = self.height - self.margin.bottom;
+
+				if prog <= 0. {
+					bottom
+				} else {
+					(bottom as f64 - (prog * (bottom - self.margin.top) as f64)) as usize
+				}
 			}
 		};
 
@@ -138,8 +154,8 @@ impl<'a> ChartBuffer<'a> {
 			mem::swap(&mut p1, &mut p2);
 		}
 
-		let adjacent = Self::distance(p1.0, p2.0) as f64;
-		let opposite = Self::distance(p1.1, p2.1) as f64;
+		let adjacent = Self::distance(p1.0 as isize, p2.0 as isize) as f64;
+		let opposite = Self::distance(p1.1 as isize, p2.1 as isize) as f64;
 		let tan = opposite / adjacent;
 
 		for x in p1.0..p2.0 {
@@ -218,7 +234,7 @@ impl<'a> ChartBuffer<'a> {
 		self.text((min.0 + 1, min.1 + 1), text, rgba);
 	}
 
-	pub fn distance(x1: usize, x2: usize) -> isize {
-		x2 as isize - x1 as isize
+	pub fn distance(x1: isize, x2: isize) -> isize {
+		x2 - x1
 	}
 }
