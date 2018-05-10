@@ -75,9 +75,9 @@ impl RendererExtension for RSI {
 			{
 				let offset = ((periods as f64 + 0.5) * (buffer.timeframe as f64) / (data.len() as f64)) as i64;
 
-				for i in 1..rsi.len() {
-					let p1 = buffer.data_to_coords(rsi[i - 1] / 100., buffer.timeframe * (i - 1) as i64 / data.len() as i64 + offset);
-					let p2 = buffer.data_to_coords(rsi[i] / 100., buffer.timeframe * i as i64 / data.len() as i64 + offset);
+				for i in 0..rsi.len() - 1 {
+					let p1 = buffer.data_to_coords(rsi[i] / 100., buffer.timeframe * i as i64 / data.len() as i64 + offset);
+					let p2 = buffer.data_to_coords(rsi[i + 1] / 100., buffer.timeframe * (i + 1) as i64 / data.len() as i64 + offset);
 
 					buffer.line(p1, p2, self.colour);
 				}
