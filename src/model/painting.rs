@@ -40,8 +40,8 @@ pub trait Painter {
 			mem::swap(&mut p1, &mut p2);
 		}
 
-		let adjacent = (p2.0 as isize - p1.0 as isize) as f64;
-		let opposite = (p2.1 as isize - p1.1 as isize) as f64;
+		let adjacent = (p2.0 as i64 - p1.0 as i64) as f64;
+		let opposite = (p2.1 as i64 - p1.1 as i64) as f64;
 		let tan = opposite / adjacent;
 
 		for x in p1.0..p2.0 {
