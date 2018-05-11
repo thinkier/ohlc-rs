@@ -111,6 +111,12 @@ impl OHLCRenderOptions {
 		self
 	}
 
+	pub fn add_extensions(mut self, extensions: Vec<Box<RendererExtension>>) -> Self {
+		self.render_extensions.extend(extensions);
+
+		self
+	}
+
 	/// Renders the OHLC Chart by the data, using the configs provided.
 	///
 	/// Takes a lambda function for processing the image once it's rendered, do not do anything asynchronous with the image as it will be deleted as soon as the function finishes.
