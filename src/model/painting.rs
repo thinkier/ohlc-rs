@@ -36,6 +36,8 @@ pub trait Painter {
 
 	/// Draw a line between two points
 	fn line(&mut self, mut p1: Point, mut p2: Point, rgba: u32) {
+		let mut pixels = vec![];
+
 		if p1.0 > p2.0 {
 			mem::swap(&mut p1, &mut p2);
 		}
@@ -46,7 +48,7 @@ pub trait Painter {
 
 		for x in p1.0..p2.0 {
 			let y = (p1.1 as f64 + if (x - p1.0) != 0 { tan * (x - p1.0) as f64 } else { 0. }) as usize;
-			self.colour(x, y, rgba);
+			pixels.push((x, y));
 		}
 
 		if p1.1 > p2.1 {
@@ -55,6 +57,12 @@ pub trait Painter {
 
 		for y in p1.1..p2.1 {
 			let x = (p1.0 as f64 + if tan != 0. { (y - p1.1) as f64 / tan } else { 0. }) as usize;
+			pixels.push((x, y));
+		}
+
+		pixels.dedup_by(|a, b| a == b);
+
+		for (x, y) in pixels {
 			self.colour(x, y, rgba);
 		}
 	}
