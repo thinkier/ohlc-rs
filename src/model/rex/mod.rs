@@ -2,6 +2,7 @@ pub use data::OHLC;
 pub use OHLCRenderOptions;
 pub use self::basic_indicative_lines::BasicIndicativeLines;
 pub use self::bollinger_bands::BollingerBands;
+pub use self::ema::EMA;
 pub use self::grid_lines::GridLines;
 pub use self::no_extension::NoExtension;
 pub use self::ohlc_candles::OHLCCandles;

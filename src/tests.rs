@@ -43,6 +43,26 @@ fn render_draw_sample_data_with_bb() {
 }
 
 #[test]
+fn render_draw_sample_data_with_ema() {
+	let _ = env_logger::try_init();
+
+	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
+	let bb = EMA::new(20, 0.5, 0x0000FF7F);
+	{
+		let mut options = OHLCRenderOptions::new();
+		options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+			.line(0xCCCCCCFF, 200., 24)
+			.background_colour(0x36393EFF)
+			.add_extension(bb);
+
+		options.render_and_save(
+			data.clone(),
+			&Path::new("test-draw-sample-data+ema.png"),
+		).unwrap();
+	}
+}
+
+#[test]
 fn render_draw_sample_data_with_test_text() {
 	let _ = env_logger::try_init();
 
