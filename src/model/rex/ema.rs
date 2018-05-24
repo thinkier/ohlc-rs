@@ -18,7 +18,7 @@ impl RendererExtension for EMA {
 	fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
 		let tf = buffer.timeframe;
 		let len = data.len();
-		let ema = ema(&self, data);
+		let ema = ema(&self, &median_list(data));
 
 		for p in self.periods + 1..len {
 			let i = p - self.periods;
@@ -35,10 +35,8 @@ impl RendererExtension for EMA {
 	}
 }
 
-pub fn ema(ema: &EMA, data: &[OHLC]) -> Vec<f64> {
+pub fn ema(ema: &EMA, data: &[f64]) -> Vec<f64> {
 	let mut buf = vec![];
-
-	let data = median_list(data);
 
 	for point in ema.periods..data.len() {
 		let mut numerator = 0.;
