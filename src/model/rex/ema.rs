@@ -22,6 +22,16 @@ impl RendererExtension for EMA {
 	}
 }
 
-pub fn middle_of_ohlc(ohlc: OHLC) -> f64 {
+pub fn median_of_ohlc(ohlc: OHLC) -> f64 {
 	((ohlc.h - ohlc.l) / 2.) + ohlc.l
+}
+
+pub fn median_list(list: &[OHLC]) -> Vec<f64> {
+	let mut buf = vec![];
+
+	for ohlc in list {
+		buf.push(median_of_ohlc(*ohlc));
+	}
+
+	buf
 }

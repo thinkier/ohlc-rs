@@ -11,8 +11,8 @@ fn render_draw_sample_data() {
 	let _ = env_logger::try_init();
 
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
-	let options = OHLCRenderOptions::new()
-		.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+	let mut options = OHLCRenderOptions::new();
+	options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 		.line(0xCCCCCCFF, 200., 24)
 		.background_colour(0x36393EFF);
 
@@ -29,12 +29,11 @@ fn render_draw_sample_data_with_bb() {
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
 	let bb = BollingerBands::new(20, 2, 0x0000FF7F);
 	{
-		let options = OHLCRenderOptions::new()
-			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+		let mut options = OHLCRenderOptions::new();
+		options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.line(0xCCCCCCFF, 200., 24)
 			.background_colour(0x36393EFF)
 			.add_extension(bb);
-		;
 
 		options.render_and_save(
 			data.clone(),
@@ -50,8 +49,8 @@ fn render_draw_sample_data_with_test_text() {
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
 	let tt = test_text::TestText {};
 	{
-		let options = OHLCRenderOptions::new()
-			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+		let mut options = OHLCRenderOptions::new();
+		options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.line(0xCCCCCCFF, 200., 24)
 			.background_colour(0x36393EFF)
 			.add_extension(tt);
@@ -71,8 +70,8 @@ fn render_draw_sample_data_with_test_fill() {
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
 	let tf = TestFill { colour: 0xFFFF00FF };
 	{
-		let options = OHLCRenderOptions::new()
-			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+		let mut options = OHLCRenderOptions::new();
+		options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.line(0xCCCCCCFF, 200., 24)
 			.background_colour(0x36393EFF)
 			.add_extension(tf);
@@ -91,8 +90,8 @@ fn render_draw_sample_data_with_test_fill_with_alpha() {
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
 	let tf = TestFill { colour: 0xFFFF007F };
 	{
-		let options = OHLCRenderOptions::new()
-			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+		let mut options = OHLCRenderOptions::new();
+		options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.line(0xCCCCCCFF, 200., 24)
 			.background_colour(0x36393EFF)
 			.add_extension(tf);
@@ -111,8 +110,8 @@ fn render_draw_sample_data_with_test_rsi() {
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
 	let rsi = RSI::new(0xCCCCCCFF, 0xFFFF007F, 0x27A819FF, 0xD33040FF);
 	{
-		let options = OHLCRenderOptions::new()
-			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+		let mut options = OHLCRenderOptions::new();
+		options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.line(0xCCCCCCFF, 200., 24)
 			.background_colour(0x36393EFF)
 			.add_extension(rsi);
@@ -131,8 +130,8 @@ fn render_draw_sample_data_with_test_line() {
 	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
 	let ttl = TestLine {};
 	{
-		let options = OHLCRenderOptions::new()
-			.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+		let mut options = OHLCRenderOptions::new();
+		options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
 			.line(0xCCCCCCFF, 200., 24)
 			.background_colour(0x36393EFF)
 			.add_extension(ttl);

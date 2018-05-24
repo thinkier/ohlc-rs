@@ -1,5 +1,5 @@
 use model::*;
-use model::rex::ema::middle_of_ohlc;
+use model::rex::ema::median_list;
 
 #[derive(Debug)]
 struct BandPoints {
@@ -29,7 +29,7 @@ impl RendererExtension for BollingerBands {
 			let min = i - self.periods;
 
 			let data_slice = &data[min..i];
-			let medians = into_median(data_slice);
+			let medians = median_list(data_slice);
 			let scaled_std_dev = std_dev(&medians[..]) * self.standard_deviations as f64;
 			let moving_avg = avg(&medians[..]);
 			let points = BandPoints {
@@ -93,14 +93,4 @@ fn avg(prices: &[f64]) -> f64 {
 	}
 
 	sum / prices.len() as f64
-}
-
-fn into_median(list: &[OHLC]) -> Vec<f64> {
-	let mut buffer = vec![];
-
-	for ohlc in list {
-		buffer.push(middle_of_ohlc(*ohlc));
-	}
-
-	return buffer;
 }
