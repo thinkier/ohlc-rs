@@ -10,6 +10,7 @@ pub use super::RendererExtension;
 
 pub mod basic_indicative_lines;
 pub mod bollinger_bands;
+pub mod ema;
 pub mod grid_lines;
 pub mod no_extension;
 pub mod ohlc_candles;

@@ -1,4 +1,5 @@
 use model::*;
+use model::rex::ema::middle_of_ohlc;
 
 #[derive(Debug)]
 struct BandPoints {
@@ -92,10 +93,6 @@ fn avg(prices: &[f64]) -> f64 {
 	}
 
 	sum / prices.len() as f64
-}
-
-fn middle_of_ohlc(ohlc: OHLC) -> f64 {
-	((ohlc.h - ohlc.l) / 2.) + ohlc.l
 }
 
 fn into_median(list: &[OHLC]) -> Vec<f64> {
