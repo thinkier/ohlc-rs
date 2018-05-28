@@ -41,7 +41,7 @@ fn render_draw_sample_data_plus_bb() {
 
 #[test]
 fn render_draw_sample_data_plus_ema() {
-	draw_with_extension(Some(EMA::new(20, 0.5, 0x0000FF7F)), "+ema");
+	draw_with_extension(Some(EMA::new(20, 0.1, 0x0000FF7F)), "+ema");
 }
 
 #[test]
