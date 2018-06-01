@@ -14,7 +14,7 @@ fn draw_with_extension<T: RendererExtension + 'static>(ext: Option<T>, suffix: &
 
 	{
 		let mut options = OHLCRenderOptions::new();
-		options.title("BTCUSD | ohlc-rs", 0x007F7FFF)
+		options.title(&format!("BTCUSD | ohlc-rs{}", suffix), 0x007F7FFF)
 			.line(0xCCCCCCFF, 200., 24)
 			.background_colour(0x36393EFF);
 
@@ -36,12 +36,17 @@ fn render_draw_sample_data() {
 
 #[test]
 fn render_draw_sample_data_plus_bb() {
-	draw_with_extension(Some(BollingerBands::new(20, 2, 0x0000FF7F)), "+bb");
+	draw_with_extension(Some(BollingerBands::new(20, 2, 0xFF0000FF)), "+bb");
+}
+
+#[test]
+fn render_draw_sample_data_plus_dema() {
+	draw_with_extension(Some(DEMA::new(EMA::new(20, 0.1, 0xFF0000FF))), "+dema");
 }
 
 #[test]
 fn render_draw_sample_data_plus_ema() {
-	draw_with_extension(Some(EMA::new(20, 0.1, 0x0000FF7F)), "+ema");
+	draw_with_extension(Some(EMA::new(20, 0.1, 0xFF0000FF)), "+ema");
 }
 
 #[test]

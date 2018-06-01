@@ -3,9 +3,9 @@ use model::buffer::ChartBuffer;
 
 #[derive(Clone, Debug)]
 pub struct EMA {
-	periods: usize,
-	smoothing_factor: f64,
-	colour: u32,
+	pub(crate) periods: usize,
+	pub(crate) smoothing_factor: f64,
+	pub(crate) colour: u32,
 }
 
 impl EMA {
@@ -21,10 +21,8 @@ impl RendererExtension for EMA {
 		let ema = ema(&self, &median_list(data));
 
 		for p in self.periods + 1..len {
-			let i = p - self.periods;
-
-			let p1 = buffer.data_to_coords(ema[i - 1], (tf as f64 * ((p - 1) as f64 / len as f64)) as i64);
-			let p2 = buffer.data_to_coords(ema[i], (tf as f64 * (p as f64 / len as f64)) as i64);
+			let p1 = buffer.data_to_coords(ema[p - 1], (tf as f64 * ((p - 1) as f64 / len as f64)) as i64);
+			let p2 = buffer.data_to_coords(ema[p], (tf as f64 * (p as f64 / len as f64)) as i64);
 
 			buffer.line(p1, p2, self.colour);
 		}
@@ -38,10 +36,10 @@ impl RendererExtension for EMA {
 pub fn ema(ema: &EMA, data: &[f64]) -> Vec<f64> {
 	let mut buf = vec![];
 
-	for point in ema.periods..data.len() {
+	for point in 0..data.len() {
 		let mut numerator = 0.;
 		let mut denominator = 0.;
-		for i in point - ema.periods..point + 1 {
+		for i in if point > ema.periods { point - ema.periods } else { 0 }..point + 1 {
 			let exponent = (point + 1) - i;
 			let weight = (1. - ema.smoothing_factor).powf(exponent as f64);
 
