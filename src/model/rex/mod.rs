@@ -1,3 +1,4 @@
+pub use buffer::*;
 pub use data::OHLC;
 pub use OHLCRenderOptions;
 pub use self::basic_indicative_lines::BasicIndicativeLines;
@@ -8,7 +9,15 @@ pub use self::grid_lines::GridLines;
 pub use self::no_extension::NoExtension;
 pub use self::ohlc_candles::OHLCCandles;
 pub use self::rsi::RSI;
-pub use super::RendererExtension;
+use std::fmt::Debug;
+
+
+pub trait RendererExtension: Debug {
+	fn apply(&self, _buffer: &mut ChartBuffer, _data: &[OHLC]);
+
+	fn name(&self) -> String;
+}
+
 
 pub mod basic_indicative_lines;
 pub mod bollinger_bands;
