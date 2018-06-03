@@ -106,10 +106,19 @@ pub trait Painter {
 	}
 
 	/// Paint some text in the colour provided, starting in the top left corner specified
-	fn text(&mut self, topleft: Point, text: &str, rgba: u32) {
+	fn text(&mut self, mut topleft: Point, text: &str, rgba: u32) {
 		let bytes = text.as_bytes();
 		for i in 0..bytes.len() {
-			let font_face = ASCII_TABLE[(|b| { if b > 127 { 0x20 } else { b } })(bytes[i]) as usize];
+			let byte = bytes[i];
+
+			if byte == b'\n' {
+				topleft.1 += 17;
+				continue;
+			}
+
+			let table_idx = if byte > 127 { 0x20 } else { byte } as usize;
+
+			let font_face = ASCII_TABLE[table_idx];
 			for delta_x in 0..10 {
 				for delta_y in 0..17 {
 					let a = (((rgba as u8) as f64 / 255.) * font_face[delta_x + delta_y * 10] as f64) as u32;
