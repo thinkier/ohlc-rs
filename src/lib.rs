@@ -215,7 +215,7 @@ impl OHLCRenderOptions {
 			ext.apply(&mut chart_buffer, &data[..]);
 
 			if let Some(rgba) = ext.lore_colour() {
-				chart_buffer.text(lore_cursor, &ext.name(), rgba);
+				chart_buffer.text_with_background(lore_cursor, &ext.name(), rgba, 0x7F7F7F7F);
 
 				lore_cursor.1 += 17; // Move down 1 row, 17 is the char height
 			}

@@ -129,7 +129,7 @@ pub trait Painter {
 		}
 	}
 
-	/// Draw text according to specifications and a box around it as well (give 1 pix of both x and y margin)
+	/// Draw text according to specifications and a box around it as well (give 1 pix of both x and y margin). Supports a single line only.
 	fn text_with_outline(&mut self, topleft: Point, text: &str, rgba: u32) {
 		let count = text.as_bytes().len();
 		for delta_x in 0..count * 10 + 2 {
@@ -143,6 +143,21 @@ pub trait Painter {
 		}
 
 		self.text((topleft.0 + 1, topleft.1 + 1), text, rgba);
+	}
+
+	/// Draw text according to specifications and a background behind it as well. Supports a single line only.
+	fn text_with_background(&mut self, topleft: Point, text: &str, rgba: u32, background_rgba: u32) {
+		let count = text.as_bytes().len();
+		for delta_x in 0..count * 10 {
+			let x = topleft.0 + delta_x;
+			for delta_y in 0..17 {
+				let y = topleft.1 + delta_y;
+
+				self.colour(x, y, background_rgba);
+			}
+		}
+
+		self.text((topleft.0, topleft.1), text, rgba);
 	}
 
 	/// Paint the buffer in a certain colour
