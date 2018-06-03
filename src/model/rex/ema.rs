@@ -28,6 +28,10 @@ impl RendererExtension for EMA {
 		}
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		Some(self.colour)
+	}
+
 	fn name(&self) -> String {
 		format!("EMA({}, sf={})", self.periods, self.smoothing_factor)
 	}

@@ -85,6 +85,10 @@ impl RendererExtension for RSI {
 		});
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		None
+	}
+
 	fn name(&self) -> String {
 		"RSI(10)".to_string()
 	}

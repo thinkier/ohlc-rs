@@ -35,6 +35,10 @@ impl RendererExtension for DEMA {
 		}
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		Some(self.inner.colour)
+	}
+
 	fn name(&self) -> String {
 		format!("DEMA({}, sf={})", self.inner.periods, self.inner.smoothing_factor)
 	}

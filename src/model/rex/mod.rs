@@ -15,6 +15,8 @@ use std::fmt::Debug;
 pub trait RendererExtension: Debug {
 	fn apply(&self, _buffer: &mut ChartBuffer, _data: &[OHLC]);
 
+	fn lore_colour(&self) -> Option<u32>;
+
 	fn name(&self) -> String;
 }
 

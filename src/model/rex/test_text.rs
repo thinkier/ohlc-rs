@@ -9,6 +9,10 @@ impl RendererExtension for TestText {
 		buffer.text((0, 60), "DANKMEME", 0xFFFF007F);
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		None
+	}
+
 	fn name(&self) -> String {
 		"TEST_Text()".to_string()
 	}

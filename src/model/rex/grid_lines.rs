@@ -52,6 +52,10 @@ impl RendererExtension for GridLines {
 		}
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		None
+	}
+
 	fn name(&self) -> String {
 		"CORE_GridLines()".to_string()
 	}

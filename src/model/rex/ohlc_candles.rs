@@ -41,6 +41,10 @@ impl RendererExtension for OHLCCandles {
 		}
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		None
+	}
+
 	fn name(&self) -> String {
 		"OHLC_Candles()".to_string()
 	}

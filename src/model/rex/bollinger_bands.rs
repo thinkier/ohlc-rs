@@ -64,6 +64,10 @@ impl RendererExtension for BollingerBands {
 		}
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		Some(self.line_colour)
+	}
+
 	fn name(&self) -> String {
 		format!("BB({}, {})", self.periods, self.standard_deviations)
 	}

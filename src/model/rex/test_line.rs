@@ -13,6 +13,10 @@ impl RendererExtension for TestLine {
 		buffer.line((0, 0), (1309, 0), 0xFFFF00FF);
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		None
+	}
+
 	fn name(&self) -> String {
 		"TEST_Line()".to_string()
 	}

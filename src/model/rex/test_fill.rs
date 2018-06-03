@@ -10,6 +10,10 @@ impl RendererExtension for TestFill {
 		buffer.rect(0, 0, 200, 200, self.colour);
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		None
+	}
+
 	fn name(&self) -> String {
 		"TEST_Fill()".to_string()
 	}

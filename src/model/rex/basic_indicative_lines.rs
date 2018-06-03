@@ -23,6 +23,10 @@ impl RendererExtension for BasicIndicativeLines {
 		draw(buffer, data.c, self.current_colour);
 	}
 
+	fn lore_colour(&self) -> Option<u32> {
+		None
+	}
+
 	fn name(&self) -> String {
 		"CORE_BasicIndicativeLines()".to_string()
 	}
