@@ -7,6 +7,7 @@ extern crate tempdir;
 
 pub use data::*;
 use model::*;
+use model::painting::Point;
 use model::rex::*;
 use std::boxed::Box;
 use std::collections::hash_map::DefaultHasher;
@@ -208,12 +209,24 @@ impl OHLCRenderOptions {
 			debug!("Added title text @ {:?}", start_time.elapsed());
 		}
 
+		let mut lore_cursor: Point = (chart_buffer.margin.left + 4, chart_buffer.margin.top + 4);
+
 		for ext in &self.render_extensions {
 			ext.apply(&mut chart_buffer, &data[..]);
+
+			if let Some(rgba) = ext.lore_colour() {
+				chart_buffer.text(lore_cursor, &ext.name(), rgba);
+
+				lore_cursor.1 += 17; // Move down 1 row, 17 is the char height
+			}
 
 			#[cfg(test)] {
 				debug!("Rendered extension: {} @ {:?}", ext.name(), start_time.elapsed());
 			}
+		}
+
+		#[cfg(test)] {
+			debug!("Rendered extensions lores @ {:?}", start_time.elapsed());
 		}
 
 		#[cfg(test)] {
