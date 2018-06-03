@@ -55,6 +55,19 @@ fn render_draw_sample_data_plus_rsi() {
 }
 
 #[test]
+fn render_draw_sample_data_plus_volume() {
+	let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
+
+	let mut volumes = vec![];
+
+	for ohlc in data {
+		volumes.push(ohlc.h - 5000.);
+	}
+
+	draw_with_extension(Some(Volume::new(0xCCCCCCFF, volumes, 0x27A819FF, 0xD33040FF)), "+volume");
+}
+
+#[test]
 fn render_draw_sample_data_with_test_text() {
 	draw_with_extension(Some(TestText {}), "_test_text");
 }

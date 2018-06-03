@@ -1,5 +1,6 @@
 pub use buffer::*;
 pub use data::OHLC;
+pub use model::rex::volume::Volume;
 pub use OHLCRenderOptions;
 pub use self::basic_indicative_lines::BasicIndicativeLines;
 pub use self::bollinger_bands::BollingerBands;
@@ -20,7 +21,6 @@ pub trait RendererExtension: Debug {
 	fn name(&self) -> String;
 }
 
-
 pub mod basic_indicative_lines;
 pub mod bollinger_bands;
 pub mod dema;
@@ -29,6 +29,7 @@ pub mod grid_lines;
 pub mod no_extension;
 pub mod ohlc_candles;
 pub mod rsi;
+pub mod volume;
 #[cfg(test)]
 pub mod test_fill;
 #[cfg(test)]
