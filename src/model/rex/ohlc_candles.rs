@@ -25,7 +25,7 @@ impl RendererExtension for OHLCCandles {
 			// Main big block
 			{
 				let p1 = buffer.data_to_coords(ohlc.o, period * i as i64);
-				let mut p2 = buffer.data_to_coords(ohlc.c, ((period * (i as i64)) as f64 + period_addition) as i64);
+				let p2 = buffer.data_to_coords(ohlc.c, ((period * (i as i64)) as f64 + period_addition) as i64);
 
 				buffer.rect_point(p1, p2, colour);
 			}
