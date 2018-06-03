@@ -29,7 +29,7 @@ impl RendererExtension for EMA {
 	}
 
 	fn name(&self) -> String {
-		format!("EMA({}, {})", self.periods, self.smoothing_factor)
+		format!("EMA({}, sf={})", self.periods, self.smoothing_factor)
 	}
 }
 

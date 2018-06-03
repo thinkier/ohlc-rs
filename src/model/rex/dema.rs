@@ -36,7 +36,7 @@ impl RendererExtension for DEMA {
 	}
 
 	fn name(&self) -> String {
-		format!("DEMA({}, {})", self.inner.periods, self.inner.smoothing_factor)
+		format!("DEMA({}, sf={})", self.inner.periods, self.inner.smoothing_factor)
 	}
 }
 
