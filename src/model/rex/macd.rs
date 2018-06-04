@@ -97,8 +97,8 @@ impl RendererExtension for MACD {
 					let len = data.len() as i64;
 
 					for i in *begin_pos + 1..len as usize {
-						let time1 = period * i as i64 + (period_addition / 2.) as i64;
-						let time2 = period * (i + 1) as i64 + (period_addition / 2.) as i64;
+						let time1 = period * (i - 1) as i64 + (period_addition / 2.) as i64;
+						let time2 = period * i as i64 + (period_addition / 2.) as i64;
 						let p1 = buffer.data_to_coords((data[i - 1] - lowest) / range, time1 - (period_addition / 12.).ceil() as i64);
 						let p2 = buffer.data_to_coords((data[i] - lowest) / range, time2 - (period_addition / 12.).floor() as i64);
 
