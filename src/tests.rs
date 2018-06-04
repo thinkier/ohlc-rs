@@ -50,6 +50,11 @@ fn render_draw_sample_data_plus_ema() {
 }
 
 #[test]
+fn render_draw_sample_data_plus_macd() {
+	draw_with_extension(Some(MACD::new(0xFF007FFF, 0xFFFFFFFF, 0x00FFFFFF, 0xFF0000FF, 0.1)), "+macd");
+}
+
+#[test]
 fn render_draw_sample_data_plus_rsi() {
 	draw_with_extension(Some(RSI::new(0xCCCCCCFF, 0xFFFF007F, 0x27A819FF, 0xD33040FF)), "+rsi");
 }
