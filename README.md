@@ -1,4 +1,6 @@
 # ohlc-rs
+**WARNING: The GitHub branch may not be in sync with the actual project.**
+
 OHLC chart generator
 
 Put this in your `Cargo.toml`
