@@ -17,8 +17,11 @@ use std::time::SystemTime;
 use tempdir::*;
 pub use utils::*;
 
+pub mod fonts {
+	include!(concat!(env!("OUT_DIR"), "/fonts.rs"));
+}
+
 pub mod data;
-mod fonts;
 pub mod model;
 #[cfg(test)]
 mod tests;

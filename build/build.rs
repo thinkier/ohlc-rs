@@ -1,15 +1,15 @@
 extern crate image;
 
 use image::GenericImage;
+use std::env;
 use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
 fn main() {
-	let out_dir = "src";
-	let build_dir = "build";
+	let out_dir = env::var("OUT_DIR").unwrap();
 
-	let img = image::open(&Path::new(&build_dir).join("consolas-18px-ascii-table.png")).unwrap();
+	let img = image::open(&Path::new(&"build/consolas-18px-ascii-table.png")).unwrap();
 
 	// Character sizes are 7 wide, 12 tall
 
