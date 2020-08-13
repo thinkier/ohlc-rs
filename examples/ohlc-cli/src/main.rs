@@ -50,7 +50,6 @@ fn main() {
 	if options.bb {
 		ohlc.add_extension(BollingerBands::new(20, 2, 0x00AAAAFF));
 	}
-
 	if options.rsi {
 		ohlc.add_extension(RSI::new(0xFFFFFFFF, 0xFF7F00FF, 0xFF0000FF, 0x00FF00FF));
 	}
@@ -64,12 +63,8 @@ fn main() {
 		ohlc.add_extension(MACD::new(0x00FF00FF, 0xFF0000FF, 0x7F9F00FF, 0xFFFFFFFF, 0.1));
 	}
 
-	ohlc.render(get_data(&options.input), |p| {
-		fs::rename(p, &options.output)
-			.map_err(|err| format!("{:?}", err))?;
-
-		Ok(())
-	}).unwrap().unwrap();
+	ohlc.render(get_data(&options.input), |p| fs::rename(p, &options.output)
+		.map_err(|err| format!("{:?}", err))).unwrap().unwrap();
 }
 
 fn get_data(path: &str) -> Vec<OHLC> {
