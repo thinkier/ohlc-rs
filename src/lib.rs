@@ -52,7 +52,7 @@ pub struct OHLCRenderOptions {
 	pub up_colour: u32,
 	/// Additional rendering extensions
 	#[serde(skip)]
-	pub(crate) render_extensions: Vec<Box<RendererExtension>>,
+	pub(crate) render_extensions: Vec<Box<dyn RendererExtension>>,
 }
 
 impl OHLCRenderOptions {
@@ -74,14 +74,14 @@ impl OHLCRenderOptions {
 		}
 	}
 
-	pub fn title<'a, 'b>(&'a mut self, title: &'b str, colour: u32) -> &'a mut Self {
+	pub fn title(&mut self, title: &str, colour: u32) -> &mut Self {
 		self.title = title.to_string();
 		self.title_colour = colour;
 
 		self
 	}
 
-	pub fn indicator_colours<'a>(&'a mut self, current_val: u32, down: u32, up: u32) -> &'a mut Self {
+	pub fn indicator_colours(&mut self, current_val: u32, down: u32, up: u32) -> &mut Self {
 		self.current_value_colour = current_val;
 		self.down_colour = down;
 		self.up_colour = up;
@@ -89,7 +89,7 @@ impl OHLCRenderOptions {
 		self
 	}
 
-	pub fn line<'a>(&'a mut self, colour: u32, price_interval: f64, time_interval: u64) -> &'a mut Self {
+	pub fn line(&mut self, colour: u32, price_interval: f64, time_interval: u64) -> &mut Self {
 		self.line_colour = colour;
 		self.price_line_interval = price_interval;
 		self.time_line_interval = time_interval as i64;
@@ -97,25 +97,25 @@ impl OHLCRenderOptions {
 		self
 	}
 
-	pub fn background_colour<'a>(&'a mut self, colour: u32) -> &'a mut Self {
+	pub fn background_colour(&mut self, colour: u32) -> &mut Self {
 		self.background_colour = colour;
 
 		self
 	}
 
-	pub fn time_units<'a>(&'a mut self, time_units: u64) -> &'a mut Self {
+	pub fn time_units(&mut self, time_units: u64) -> &mut Self {
 		self.time_units = time_units;
 
 		self
 	}
 
-	pub fn add_extension<'a, RE: RendererExtension + 'static>(&'a mut self, extension: RE) -> &'a mut Self {
+	pub fn add_extension<RE: RendererExtension + 'static>(&mut self, extension: RE) -> &mut Self {
 		self.render_extensions.push(Box::new(extension));
 
 		self
 	}
 
-	pub fn add_extensions<'a>(&'a mut self, extensions: Vec<Box<RendererExtension>>) -> &'a mut Self {
+	pub fn add_extensions(&mut self, extensions: Vec<Box<dyn RendererExtension>>) -> &mut Self {
 		self.render_extensions.extend(extensions);
 
 		self
@@ -135,7 +135,7 @@ impl OHLCRenderOptions {
 		if let Ok(dir) = TempDir::new(&format!("ohlc_render_{}", hasher.finish())) {
 			let file_path = dir.path().join("chart.png");
 
-			let mut result = match self.render_and_save(data, &file_path) {
+			let result = match self.render_and_save(data, &file_path) {
 				Ok(_) => Ok((callback)(&file_path)),
 				Err(err) => Err(err)
 			};
