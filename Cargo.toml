@@ -1,7 +1,7 @@
 [package]
 name = "ohlc"
 version = "0.2.0"
-authors = ["UninterestinAcc <uninterestinacc@users.noreply.github.com>"]
+authors = ["thinkier <26728734+thinkier@users.noreply.github.com>"]
 build = "build/build.rs"
 
 [build-dependencies]

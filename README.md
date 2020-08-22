@@ -6,7 +6,7 @@ OHLC chart generator
 Put this in your `Cargo.toml`
 ```toml
 [dependencies.ohlc]
-git = "https://github.com/UninterestinAcc/ohlc-rs"
+git = "https://github.com/thinkier/ohlc-rs"
 ```
 
 ## Quick start
