@@ -1,10 +1,14 @@
+use serde::export::PhantomData;
+
 use model::*;
 
 #[derive(Clone, Debug)]
-pub struct TestText;
+pub struct TestText<C>(pub PhantomData<C>);
 
-impl RendererExtension for TestText {
-    fn apply(&self, buffer: &mut ChartBuffer, _data: &[Candle]) {
+impl<C: Candle> RendererExtension for TestText<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, _data: &[C]) {
         buffer.text((0, 0), "DANKMEME", 0xFFFF00FF);
         buffer.text((0, 60), "DANKMEME", 0xFFFF007F);
     }
@@ -18,8 +22,8 @@ impl RendererExtension for TestText {
     }
 }
 
-impl PartialEq for TestText {
-    fn eq(&self, _: &TestText) -> bool {
+impl<C> PartialEq for TestText<C> {
+    fn eq(&self, _: &TestText<C>) -> bool {
         true
     }
 }

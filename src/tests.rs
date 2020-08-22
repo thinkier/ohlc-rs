@@ -1,17 +1,17 @@
 extern crate env_logger;
 extern crate serde_json;
 
+use serde::export::PhantomData;
+
+use model::data::OHLC;
 use model::rex::*;
 use model::rex::test_fill::TestFill;
 use model::rex::test_line::TestLine;
 use model::rex::test_text::TestText;
-use tests::data::OHLC;
 
 use super::*;
 
-mod data;
-
-fn draw_with_extension<T: RendererExtension + 'static>(ext: Option<T>, suffix: &str) {
+fn draw_with_extension<T: RendererExtension<Candle=OHLC> + 'static>(ext: Option<T>, suffix: &str) {
     let _ = env_logger::try_init();
 
     let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
@@ -35,7 +35,7 @@ fn draw_with_extension<T: RendererExtension + 'static>(ext: Option<T>, suffix: &
 
 #[test]
 fn render_draw_sample_data() {
-    draw_with_extension::<NoExtension>(None, "");
+    draw_with_extension::<NoExtension<OHLC>>(None, "");
 }
 
 #[test]
@@ -65,33 +65,25 @@ fn render_draw_sample_data_plus_rsi() {
 
 #[test]
 fn render_draw_sample_data_plus_volume() {
-    let data: Vec<OHLC> = self::serde_json::from_str(include_str!("../sample_data.json")).unwrap();
-
-    let mut volumes = vec![];
-
-    for ohlc in data {
-        volumes.push(ohlc.h - 5000.);
-    }
-
-    draw_with_extension(Some(Volume::new(0xCCCCCCFF, volumes, 0x27A819FF, 0xD33040FF)), "+volume");
+    draw_with_extension(Some(Volume::new(0xCCCCCCFF, 0x27A819FF, 0xD33040FF)), "+volume");
 }
 
 #[test]
 fn render_draw_sample_data_with_test_text() {
-    draw_with_extension(Some(TestText {}), "_test_text");
+    draw_with_extension(Some(TestText(PhantomData)), "_test_text");
 }
 
 #[test]
 fn render_draw_sample_data_with_test_fill() {
-    draw_with_extension(Some(TestFill { colour: 0xFFFF00FF }), "_test_fill");
+    draw_with_extension(Some(TestFill { _c: PhantomData, colour: 0xFFFF00FF }), "_test_fill");
 }
 
 #[test]
 fn render_draw_sample_data_with_test_fill_alpha() {
-    draw_with_extension(Some(TestFill { colour: 0xFFFF007F }), "_test_fill_alpha");
+    draw_with_extension(Some(TestFill { _c: PhantomData, colour: 0xFFFF007F }), "_test_fill_alpha");
 }
 
 #[test]
 fn render_draw_sample_data_with_test_line() {
-    draw_with_extension(Some(TestLine {}), "_with_test_line");
+    draw_with_extension(Some(TestLine(PhantomData)), "_with_test_line");
 }

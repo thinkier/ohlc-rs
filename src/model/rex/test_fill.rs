@@ -1,12 +1,17 @@
+use serde::export::PhantomData;
+
 use model::*;
 
 #[derive(Clone, Debug)]
-pub struct TestFill {
-    pub colour: u32
+pub struct TestFill<C> {
+    pub _c: PhantomData<C>,
+    pub colour: u32,
 }
 
-impl RendererExtension for TestFill {
-    fn apply(&self, buffer: &mut ChartBuffer, _data: &[Candle]) {
+impl<C: Candle> RendererExtension for TestFill<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, _data: &[C]) {
         buffer.rect(0, 0, 200, 200, self.colour);
     }
 
@@ -19,8 +24,8 @@ impl RendererExtension for TestFill {
     }
 }
 
-impl PartialEq for TestFill {
-    fn eq(&self, _: &TestFill) -> bool {
+impl<C> PartialEq for TestFill<C> {
+    fn eq(&self, _: &TestFill<C>) -> bool {
         true
     }
 }

@@ -1,5 +1,7 @@
 use std::hash::{Hash, Hasher};
 
+use Candle;
+
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
 pub struct OHLC {
     pub o: f64,
@@ -14,6 +16,28 @@ impl Hash for OHLC {
         state.write_u64(self.h as u64);
         state.write_u64(self.l as u64);
         state.write_u64(self.c as u64);
+    }
+}
+
+impl Candle for OHLC {
+    fn open(&self) -> f64 {
+        self.o
+    }
+
+    fn high(&self) -> f64 {
+        self.h
+    }
+
+    fn low(&self) -> f64 {
+        self.l
+    }
+
+    fn close(&self) -> f64 {
+        self.c
+    }
+
+    fn volume(&self) -> f64 {
+        0.0
     }
 }
 

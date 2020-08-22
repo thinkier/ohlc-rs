@@ -7,6 +7,7 @@ pub use self::rex::RendererExtension;
 pub mod buffer;
 pub mod painting;
 pub mod rex;
+pub mod data;
 
 pub struct Margin {
     pub top: usize,
