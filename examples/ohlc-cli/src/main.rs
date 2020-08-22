@@ -4,6 +4,7 @@ extern crate serde_json;
 
 use argh::FromArgs;
 use ohlc::*;
+use ohlc::model::data::OHLC;
 use ohlc::model::rex::{BollingerBands, DEMA, EMA, MACD, RSI};
 use std::fs;
 
@@ -41,7 +42,7 @@ fn default_output() -> String {
 fn main() {
     let options: CliOptions = argh::from_env();
 
-    let mut ohlc: OHLCRenderOptions = OHLCRenderOptions::new();
+    let mut ohlc: OHLCRenderOptions<OHLC> = OHLCRenderOptions::new();
 
     ohlc.title("ohlc-rs demo", 0xFFFFFFFF);
     ohlc.background_colour(0x444444FF);
