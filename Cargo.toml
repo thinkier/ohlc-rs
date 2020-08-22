@@ -1,6 +1,6 @@
 [package]
 name = "ohlc"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["UninterestinAcc <uninterestinacc@users.noreply.github.com>"]
 build = "build/build.rs"
 
