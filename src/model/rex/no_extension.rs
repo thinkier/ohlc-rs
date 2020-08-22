@@ -4,19 +4,19 @@ use model::*;
 pub struct NoExtension;
 
 impl RendererExtension for NoExtension {
-	fn apply(&self, _buffer: &mut ChartBuffer, _data: &[OHLC]) {}
+    fn apply(&self, _buffer: &mut ChartBuffer, _data: &[OHLC]) {}
 
-	fn lore_colour(&self) -> Option<u32> {
-		None
-	}
+    fn lore_colour(&self) -> Option<u32> {
+        None
+    }
 
-	fn name(&self) -> String {
-		"NoExtension()".to_string()
-	}
+    fn name(&self) -> String {
+        "NoExtension()".to_string()
+    }
 }
 
 impl PartialEq for NoExtension {
-	fn eq(&self, _: &NoExtension) -> bool {
-		true
-	}
+    fn eq(&self, _: &NoExtension) -> bool {
+        true
+    }
 }
