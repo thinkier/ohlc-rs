@@ -1,15 +1,14 @@
 extern crate image;
 #[macro_use]
 extern crate log;
+extern crate serde;
 #[macro_use]
 extern crate serde_derive;
 extern crate tempdir;
 
 use std::boxed::Box;
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
 use std::path::*;
-use std::time::SystemTime;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use tempdir::*;
 
@@ -30,8 +29,8 @@ mod tests;
 pub mod utils;
 
 /// OHLC Chart Configuration, mutate through the methods
-#[derive(Serialize, Deserialize, Debug)]
-pub struct OHLCRenderOptions {
+#[derive(Serialize, Deserialize)]
+pub struct OHLCRenderOptions<C> {
     /// Title of the chart
     pub title: String,
     /// Colour for the title of the chart
@@ -54,12 +53,12 @@ pub struct OHLCRenderOptions {
     pub up_colour: u32,
     /// Additional rendering extensions
     #[serde(skip)]
-    pub(crate) render_extensions: Vec<Box<dyn RendererExtension>>,
+    pub(crate) render_extensions: Vec<Box<dyn RendererExtension<Candle=C>>>,
 }
 
-impl OHLCRenderOptions {
+impl<C: Candle> OHLCRenderOptions<C> {
     /// Creates an object for render options with default parameters
-    pub fn new() -> OHLCRenderOptions {
+    pub fn new() -> OHLCRenderOptions<C> {
         OHLCRenderOptions {
             title: String::new(),
             title_colour: 0,
@@ -111,13 +110,13 @@ impl OHLCRenderOptions {
         self
     }
 
-    pub fn add_extension<RE: RendererExtension + 'static>(&mut self, extension: RE) -> &mut Self {
+    pub fn add_extension<RE: RendererExtension<Candle=C> + 'static>(&mut self, extension: RE) -> &mut Self {
         self.render_extensions.push(Box::new(extension));
 
         self
     }
 
-    pub fn add_extensions(&mut self, extensions: Vec<Box<dyn RendererExtension>>) -> &mut Self {
+    pub fn add_extensions(&mut self, extensions: Vec<Box<dyn RendererExtension<Candle=C>>>) -> &mut Self {
         self.render_extensions.extend(extensions);
 
         self
@@ -128,13 +127,10 @@ impl OHLCRenderOptions {
     /// Takes a lambda function for processing the image once it's rendered, do not do anything asynchronous with the image as it will be deleted as soon as the function finishes.
     ///
     /// Returns an error string originating from OHLC if an error occurs, and the result of the callback function otherwise.
-    pub fn render<F>(&self, data: Vec<OHLC>, callback: F) -> Result<Result<(), String>, String>
+    pub fn render<F>(&self, data: Vec<C>, callback: F) -> Result<Result<(), String>, String>
         where F: Fn(&Path) -> Result<(), String> + Sized {
-        let mut hasher = DefaultHasher::new();
-        data.hash(&mut hasher);
-
         // Create temporary directory
-        if let Ok(dir) = TempDir::new(&format!("ohlc_render_{}", hasher.finish())) {
+        if let Ok(dir) = TempDir::new(&format!("ohlc_render_{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos())) {
             let file_path = dir.path().join("chart.png");
 
             let result = match self.render_and_save(data, &file_path) {
@@ -153,7 +149,7 @@ impl OHLCRenderOptions {
     /// Renders the chart and saves it to the specified path
     ///
     /// Returns an error string if an error occurs
-    pub fn render_and_save(&self, data: Vec<OHLC>, path: &Path) -> Result<(), String> {
+    pub fn render_and_save(&self, data: Vec<C>, path: &Path) -> Result<(), String> {
         let start_time = SystemTime::now();
 
         if let Err(err) = validate(&data) {
@@ -164,7 +160,7 @@ impl OHLCRenderOptions {
             debug!("Validated input data @ {:?}", start_time.elapsed());
         }
 
-        let ohlc_of_set = calculate_ohlc_of_set(&data[..]);
+        let ohlc_of_set = aggregate(&data[..]);
 
         let margin = Margin {
             top: 60,
@@ -253,17 +249,22 @@ impl OHLCRenderOptions {
     }
 }
 
-fn validate(data: &Vec<OHLC>) -> Result<(), &'static str> {
+fn validate<C: Candle>(data: &Vec<C>) -> Result<(), &'static str> {
     for elem in data {
-        return if elem.o > elem.h {
+        let open = elem.open();
+        let high = elem.high();
+        let close = elem.close();
+        let low = elem.low();
+
+        return if open > high {
             Err("Opening value is higher than high value.")
-        } else if elem.c > elem.h {
+        } else if close > high {
             Err("Closing value is higher than high value.")
-        } else if elem.l > elem.h {
+        } else if low > high {
             Err("Low value is higher than high value.")
-        } else if elem.o < elem.l {
+        } else if open < low {
             Err("Opening value is lower than low value.")
-        } else if elem.c < elem.l {
+        } else if close < low {
             Err("Closing value is lower than low value.")
         } else {
             continue;

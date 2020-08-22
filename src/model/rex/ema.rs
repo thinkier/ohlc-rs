@@ -1,21 +1,26 @@
+use std::marker::PhantomData;
+
 use model::*;
 use model::buffer::ChartBuffer;
 
 #[derive(Clone, Debug)]
-pub struct EMA {
+pub struct EMA<C> {
+    _c: PhantomData<C>,
     pub(crate) periods: usize,
     pub(crate) smoothing_factor: f64,
     pub(crate) colour: u32,
 }
 
-impl EMA {
-    pub fn new(periods: usize, smoothing_factor: f64, colour: u32) -> EMA {
-        EMA { periods, smoothing_factor, colour }
+impl<C> EMA<C> {
+    pub fn new(periods: usize, smoothing_factor: f64, colour: u32) -> EMA<C> {
+        EMA { _c: PhantomData, periods, smoothing_factor, colour }
     }
 }
 
-impl RendererExtension for EMA {
-    fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
+impl<C: Candle> RendererExtension for EMA<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, data: &[C]) {
         let tf = buffer.timeframe;
         let len = data.len();
         let ema = ema(&self, &median_list(data));
@@ -37,7 +42,7 @@ impl RendererExtension for EMA {
     }
 }
 
-pub fn ema(ema: &EMA, data: &[f64]) -> Vec<f64> {
+pub fn ema<C: Candle>(ema: &EMA<C>, data: &[f64]) -> Vec<f64> {
     let mut buf = vec![];
 
     for point in 0..data.len() {
@@ -57,15 +62,16 @@ pub fn ema(ema: &EMA, data: &[f64]) -> Vec<f64> {
     return buf;
 }
 
-pub fn median_of_ohlc(ohlc: OHLC) -> f64 {
-    ((ohlc.h - ohlc.l) / 2.) + ohlc.l
+pub fn median_of_ohlc<C: Candle>(ohlc: &C) -> f64 {
+    let low = ohlc.low();
+    ((ohlc.high() - low) / 2.) + low
 }
 
-pub fn median_list(list: &[OHLC]) -> Vec<f64> {
+pub fn median_list<C: Candle>(list: &[C]) -> Vec<f64> {
     let mut buf = vec![];
 
     for ohlc in list {
-        buf.push(median_of_ohlc(*ohlc));
+        buf.push(median_of_ohlc(ohlc));
     }
 
     buf

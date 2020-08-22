@@ -9,6 +9,8 @@ use tests::data::OHLC;
 
 use super::*;
 
+mod data;
+
 fn draw_with_extension<T: RendererExtension + 'static>(ext: Option<T>, suffix: &str) {
     let _ = env_logger::try_init();
 

@@ -1,22 +1,27 @@
+use serde::export::PhantomData;
+
 use model::*;
 use utils::*;
 
 #[derive(Clone, Debug)]
-pub struct BasicIndicativeLines {
+pub struct BasicIndicativeLines<C> {
+    _c: PhantomData<C>,
     max_colour: u32,
     min_colour: u32,
     current_colour: u32,
 }
 
-impl BasicIndicativeLines {
-    pub fn new(max_colour: u32, min_colour: u32, current_colour: u32) -> BasicIndicativeLines {
-        BasicIndicativeLines { max_colour, min_colour, current_colour }
+impl<C> BasicIndicativeLines<C> {
+    pub fn new(max_colour: u32, min_colour: u32, current_colour: u32) -> BasicIndicativeLines<C> {
+        BasicIndicativeLines { _c: PhantomData, max_colour, min_colour, current_colour }
     }
 }
 
-impl RendererExtension for BasicIndicativeLines {
-    fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
-        let data = calculate_ohlc_of_set(data);
+impl<C: Candle> RendererExtension for BasicIndicativeLines<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, data: &[C]) {
+        let data = aggregate(data);
 
         draw(buffer, data.h, self.max_colour);
         draw(buffer, data.l, self.min_colour);

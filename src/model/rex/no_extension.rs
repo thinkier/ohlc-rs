@@ -1,10 +1,14 @@
+use std::marker::PhantomData;
+
 use model::*;
 
 #[derive(Clone, Debug)]
-pub struct NoExtension;
+pub struct NoExtension<C>(PhantomData<C>);
 
-impl RendererExtension for NoExtension {
-    fn apply(&self, _buffer: &mut ChartBuffer, _data: &[OHLC]) {}
+impl<C: Candle> RendererExtension for NoExtension<C> {
+    type Candle = C;
+
+    fn apply(&self, _buffer: &mut ChartBuffer, _data: &[C]) {}
 
     fn lore_colour(&self) -> Option<u32> {
         None
@@ -15,8 +19,8 @@ impl RendererExtension for NoExtension {
     }
 }
 
-impl PartialEq for NoExtension {
-    fn eq(&self, _: &NoExtension) -> bool {
+impl<C> PartialEq for NoExtension<C> {
+    fn eq(&self, _: &NoExtension<C>) -> bool {
         true
     }
 }

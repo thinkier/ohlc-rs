@@ -1,22 +1,27 @@
+use std::marker::PhantomData;
+
 use model::*;
 use utils::duration_string;
 
 #[derive(Clone, Debug)]
-pub struct GridLines {
+pub struct GridLines<C> {
+    _c: PhantomData<C>,
     colour: u32,
     label: bool,
     price_interval: f64,
     time_interval: i64,
 }
 
-impl GridLines {
-    pub fn new(colour: u32, label: bool, price_interval: f64, time_interval: i64) -> GridLines {
-        GridLines { colour, label, price_interval, time_interval }
+impl<C> GridLines<C> {
+    pub fn new(colour: u32, label: bool, price_interval: f64, time_interval: i64) -> GridLines<C> {
+        GridLines { _c: PhantomData, colour, label, price_interval, time_interval }
     }
 }
 
-impl RendererExtension for GridLines {
-    fn apply(&self, buffer: &mut ChartBuffer, _data: &[OHLC]) {
+impl<C: Candle> RendererExtension for GridLines<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, _data: &[C]) {
         {
             let mut price = round_start_price(&buffer, self.price_interval);
             while price <= buffer.max_price {

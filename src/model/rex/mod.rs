@@ -1,7 +1,5 @@
-use std::fmt::Debug;
-
 pub use buffer::*;
-pub use data::OHLC;
+pub use data::Candle;
 pub use model::rex::volume::Volume;
 pub use OHLCRenderOptions;
 
@@ -15,8 +13,10 @@ pub use self::no_extension::NoExtension;
 pub use self::ohlc_candles::OHLCCandles;
 pub use self::rsi::RSI;
 
-pub trait RendererExtension: Debug {
-    fn apply(&self, _buffer: &mut ChartBuffer, _data: &[OHLC]);
+pub trait RendererExtension {
+    type Candle: Candle;
+
+    fn apply(&self, _buffer: &mut ChartBuffer, _data: &[Self::Candle]);
 
     fn lore_colour(&self) -> Option<u32>;
 

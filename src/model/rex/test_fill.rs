@@ -6,7 +6,7 @@ pub struct TestFill {
 }
 
 impl RendererExtension for TestFill {
-    fn apply(&self, buffer: &mut ChartBuffer, _data: &[OHLC]) {
+    fn apply(&self, buffer: &mut ChartBuffer, _data: &[Candle]) {
         buffer.rect(0, 0, 200, 200, self.colour);
     }
 

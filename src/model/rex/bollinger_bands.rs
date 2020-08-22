@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use model::*;
 use model::rex::ema::median_list;
 
@@ -9,20 +11,23 @@ struct BandPoints {
 }
 
 #[derive(Clone, Debug)]
-pub struct BollingerBands {
+pub struct BollingerBands<C> {
+    _c: PhantomData<C>,
     periods: usize,
     standard_deviations: usize,
     line_colour: u32,
 }
 
-impl BollingerBands {
-    pub fn new(periods: usize, standard_deviations: usize, line_colour: u32) -> BollingerBands {
-        BollingerBands { periods, standard_deviations, line_colour }
+impl<C> BollingerBands<C> {
+    pub fn new(periods: usize, standard_deviations: usize, line_colour: u32) -> BollingerBands<C> {
+        BollingerBands { _c: PhantomData, periods, standard_deviations, line_colour }
     }
 }
 
-impl RendererExtension for BollingerBands {
-    fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
+impl<C: Candle> RendererExtension for BollingerBands<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, data: &[C]) {
         let mut bands = vec![];
 
         for i in self.periods..data.len() {

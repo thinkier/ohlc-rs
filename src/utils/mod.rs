@@ -3,28 +3,48 @@ use super::*;
 #[cfg(test)]
 mod tests;
 
-pub fn calculate_ohlc_of_set(data: &[OHLC]) -> OHLC {
-    let mut ohlc = OHLC::new();
+#[derive(Default)]
+pub struct SetAggregate {
+    pub o: f64,
+    pub h: f64,
+    pub l: f64,
+    pub c: f64,
+    pub v: f64,
+}
+
+impl Candle for SetAggregate {
+    fn open(&self) -> f64 { self.o }
+    fn high(&self) -> f64 { self.h }
+    fn low(&self) -> f64 { self.l }
+    fn close(&self) -> f64 { self.c }
+    fn volume(&self) -> f64 { self.v }
+}
+
+pub fn aggregate<C: Candle>(data: &[C]) -> SetAggregate {
+    let mut aggregate = SetAggregate::default();
 
     if data.len() == 0 {
-        return ohlc;
+        return aggregate;
     }
 
-    ohlc.o = data[0].o;
-    ohlc.h = data[0].h;
-    ohlc.l = data[0].l;
-    ohlc.c = data[data.len() - 1].c;
+    aggregate.o = data[0].open();
+    aggregate.h = data[0].high();
+    aggregate.l = data[0].low();
+    aggregate.c = data[data.len() - 1].close();
 
     for elem in data {
-        if elem.h > ohlc.h {
-            ohlc.h = elem.h;
+        let high = elem.high();
+        let low = elem.low();
+
+        if high > aggregate.h {
+            aggregate.h = high;
         }
-        if elem.l < ohlc.l {
-            ohlc.l = elem.l;
+        if low < aggregate.l {
+            aggregate.l = low;
         }
     }
 
-    ohlc
+    aggregate
 }
 
 const LEN_OF_MINUTE: u64 = 60;

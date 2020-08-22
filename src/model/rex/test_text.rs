@@ -4,7 +4,7 @@ use model::*;
 pub struct TestText;
 
 impl RendererExtension for TestText {
-    fn apply(&self, buffer: &mut ChartBuffer, _data: &[OHLC]) {
+    fn apply(&self, buffer: &mut ChartBuffer, _data: &[Candle]) {
         buffer.text((0, 0), "DANKMEME", 0xFFFF00FF);
         buffer.text((0, 60), "DANKMEME", 0xFFFF007F);
     }

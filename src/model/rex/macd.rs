@@ -1,10 +1,13 @@
+use std::marker::PhantomData;
+
 use model::*;
 use model::buffer::ChartBuffer;
 use model::rex::dema::*;
 use model::rex::ema::*;
 
 #[derive(Clone, Debug)]
-pub struct MACD {
+pub struct MACD<C> {
+    _c: PhantomData<C>,
     divergence_colour: u32,
     signal_colour: u32,
     histogram_colour: u32,
@@ -12,9 +15,10 @@ pub struct MACD {
     smoothing_factor: f64,
 }
 
-impl MACD {
-    pub fn new(divergence_colour: u32, signal_colour: u32, histogram_colour: u32, label_colour: u32, smoothing_factor: f64) -> MACD {
+impl<C> MACD<C> {
+    pub fn new(divergence_colour: u32, signal_colour: u32, histogram_colour: u32, label_colour: u32, smoothing_factor: f64) -> MACD<C> {
         MACD {
+            _c: PhantomData,
             divergence_colour,
             signal_colour,
             histogram_colour,
@@ -24,18 +28,20 @@ impl MACD {
     }
 }
 
-impl RendererExtension for MACD {
-    fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
+impl<C: Candle> RendererExtension for MACD<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, data: &[C]) {
         let (divergence, signal, histogram) = {
             let median_list = median_list(data);
 
-            let short = ema(&EMA::new(12, self.smoothing_factor, 0), &median_list);
-            let long = ema(&EMA::new(26, self.smoothing_factor, 0), &median_list);
+            let short = ema::<C>(&EMA::new(12, self.smoothing_factor, 0), &median_list);
+            let long = ema::<C>(&EMA::new(26, self.smoothing_factor, 0), &median_list);
 
             let mut divergence = short.clone();
             subtract(&mut divergence, &long);
 
-            let signal = ema(&EMA::new(9, self.smoothing_factor, 0), &divergence);
+            let signal = ema::<C>(&EMA::new(9, self.smoothing_factor, 0), &divergence);
 
             let mut histogram = divergence.clone();
             subtract(&mut histogram, &signal);

@@ -3,18 +3,20 @@ use model::buffer::ChartBuffer;
 use model::rex::ema::*;
 
 #[derive(Clone, Debug)]
-pub struct DEMA {
-    inner: EMA,
+pub struct DEMA<C> {
+    inner: EMA<C>,
 }
 
-impl DEMA {
-    pub fn new(ema: EMA) -> DEMA {
+impl<C> DEMA<C> {
+    pub fn new(ema: EMA<C>) -> DEMA<C> {
         DEMA { inner: ema }
     }
 }
 
-impl RendererExtension for DEMA {
-    fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
+impl<C: Candle> RendererExtension for DEMA<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, data: &[C]) {
         let tf = buffer.timeframe;
         let len = data.len();
         let dema = {

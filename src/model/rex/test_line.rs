@@ -4,7 +4,7 @@ use model::*;
 pub struct TestLine;
 
 impl RendererExtension for TestLine {
-    fn apply(&self, buffer: &mut ChartBuffer, _data: &[OHLC]) {
+    fn apply(&self, buffer: &mut ChartBuffer, _data: &[Candle]) {
         buffer.line((0, 0), (1309, 649), 0xFFFF00FF);
         buffer.line((0, 649), (1309, 0), 0xFFFF00FF);
         buffer.line((0, 0), (0, 649), 0xFFFF00FF);

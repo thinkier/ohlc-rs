@@ -1,5 +1,5 @@
 pub use buffer::*;
-pub use data::OHLC;
+pub use data::Candle;
 pub use painting::*;
 
 pub use self::rex::RendererExtension;

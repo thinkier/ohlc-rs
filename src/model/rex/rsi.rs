@@ -1,21 +1,26 @@
+use serde::export::PhantomData;
+
 use model::*;
 
 #[derive(Clone, Debug)]
-pub struct RSI {
+pub struct RSI<C> {
+    _c: PhantomData<C>,
     label_colour: u32,
     colour: u32,
     overbought_colour: u32,
     oversold_colour: u32,
 }
 
-impl RSI {
-    pub fn new(label_colour: u32, colour: u32, overbought_colour: u32, oversold_colour: u32) -> RSI {
-        RSI { label_colour, colour, overbought_colour, oversold_colour }
+impl<C> RSI<C> {
+    pub fn new(label_colour: u32, colour: u32, overbought_colour: u32, oversold_colour: u32) -> RSI<C> {
+        RSI { _c: PhantomData, label_colour, colour, overbought_colour, oversold_colour }
     }
 }
 
-impl RendererExtension for RSI {
-    fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
+impl<C: Candle> RendererExtension for RSI<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, data: &[C]) {
         let periods = 10;
 
         let mut rsi = vec![];
@@ -26,7 +31,7 @@ impl RendererExtension for RSI {
                 let mut losses = vec![];
 
                 for j in i - periods..i {
-                    let delta = data[j].c - data[j].o;
+                    let delta = data[j].close() - data[j].open();
                     if delta >= 0. {
                         gains.push(delta);
                         losses.push(0.);

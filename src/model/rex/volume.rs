@@ -1,31 +1,36 @@
+use std::marker::PhantomData;
+
 use model::*;
 
 #[derive(Clone, Debug)]
-pub struct Volume {
+pub struct Volume<C> {
+    _c: PhantomData<C>,
     label_colour: u32,
-    volume: Vec<f64>,
     buy_colour: u32,
     sell_colour: u32,
 }
 
-impl Volume {
-    pub fn new(label_colour: u32, volume: Vec<f64>, buy_colour: u32, sell_colour: u32) -> Volume {
-        Volume { label_colour, volume, buy_colour, sell_colour }
+impl<C> Volume<C> {
+    pub fn new(label_colour: u32, buy_colour: u32, sell_colour: u32) -> Volume<C> {
+        Volume { _c: PhantomData, label_colour, buy_colour, sell_colour }
     }
 }
 
-impl RendererExtension for Volume {
-    fn apply(&self, buffer: &mut ChartBuffer, data: &[OHLC]) {
+impl<C: Candle> RendererExtension for Volume<C> {
+    type Candle = C;
+
+    fn apply(&self, buffer: &mut ChartBuffer, data: &[C]) {
         let mut colour = vec![];
         let mut max_vol = 0.;
 
         for i in 0..data.len() {
-            let ohlc = data[i];
-            let vol = self.volume[i];
+            let candle = &data[i];
+            let vol = candle.volume();
+
             if vol > max_vol {
                 max_vol = vol;
             }
-            colour.push((vol, ohlc.c - ohlc.o >= 0.));
+            colour.push((vol, candle.close() < candle.open()));
         }
 
         buffer.create_extension_strip(175, move |buffer| {
