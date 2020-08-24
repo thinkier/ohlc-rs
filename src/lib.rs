@@ -127,8 +127,8 @@ impl<C: Candle> OHLCRenderOptions<C> {
     /// Takes a lambda function for processing the image once it's rendered, do not do anything asynchronous with the image as it will be deleted as soon as the function finishes.
     ///
     /// Returns an error string originating from OHLC if an error occurs, and the result of the callback function otherwise.
-    pub fn render<F>(&self, data: Vec<C>, callback: F) -> Result<Result<(), String>, String>
-        where F: Fn(&Path) -> Result<(), String> + Sized {
+    pub fn render<F, R>(&self, data: Vec<C>, callback: F) -> Result<R, String>
+        where F: Fn(&Path) -> R + Sized {
         // Create temporary directory
         if let Ok(dir) = TempDir::new(&format!("ohlc_render_{}", SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos())) {
             let file_path = dir.path().join("chart.png");
