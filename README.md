@@ -1,5 +1,5 @@
 # ohlc-rs
-**WARNING: The GitHub branch may not be in sync with the actual project.**
+**Make sure to enable the most aggressive compiler optimizations because it saves a lot of time on rendering the image!**
 
 OHLC chart generator
 
