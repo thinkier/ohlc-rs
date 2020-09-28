@@ -14,13 +14,13 @@ pub use self::ohlc_candles::OHLCCandles;
 pub use self::rsi::RSI;
 
 pub trait RendererExtension {
-    type Candle: Candle;
+	type Candle: Candle;
 
-    fn apply(&self, _buffer: &mut ChartBuffer, _data: &[Self::Candle]);
+	fn apply(&self, _buffer: &mut ChartBuffer, _data: &[Self::Candle]);
 
-    fn lore_colour(&self) -> Option<u32>;
+	fn lore_colour(&self) -> Option<u32>;
 
-    fn name(&self) -> String;
+	fn name(&self) -> String;
 }
 
 pub mod basic_indicative_lines;

@@ -10,8 +10,8 @@ pub mod rex;
 pub mod data;
 
 pub struct Margin {
-    pub top: usize,
-    pub bottom: usize,
-    pub left: usize,
-    pub right: usize,
+	pub top: usize,
+	pub bottom: usize,
+	pub left: usize,
+	pub right: usize,
 }
