@@ -56,7 +56,7 @@ impl<C: Candle> RendererExtension for Volume<C> {
 				let period = buffer.timeframe / data.len() as i64;
 				let period_addition = 4. * period as f64 / 5.;
 
-				for i in 0..vols.len() - 1 {
+				for i in 0..vols.len() {
 					let (b, t) = vols[i];
 
 					let p1 = buffer.data_to_coords(0., period * i as i64);
