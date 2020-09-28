@@ -9,15 +9,23 @@ pub struct SetAggregate {
 	pub h: f64,
 	pub l: f64,
 	pub c: f64,
+	pub bv: f64,
 	pub v: f64,
 }
 
 impl Candle for SetAggregate {
+	#[inline]
 	fn open(&self) -> f64 { self.o }
+	#[inline]
 	fn high(&self) -> f64 { self.h }
+	#[inline]
 	fn low(&self) -> f64 { self.l }
+	#[inline]
 	fn close(&self) -> f64 { self.c }
-	fn volume(&self) -> f64 { self.v }
+	#[inline]
+	fn buy_volume(&self) -> f64 { self.bv }
+	#[inline]
+	fn total_volume(&self) -> f64 { self.v }
 }
 
 pub fn aggregate<C: Candle>(data: &[C]) -> SetAggregate {
@@ -42,6 +50,9 @@ pub fn aggregate<C: Candle>(data: &[C]) -> SetAggregate {
 		if low < aggregate.l {
 			aggregate.l = low;
 		}
+
+		aggregate.bv = elem.buy_volume();
+		aggregate.v = elem.total_volume();
 	}
 
 	aggregate

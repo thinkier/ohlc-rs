@@ -20,17 +20,18 @@ impl<C: Candle> RendererExtension for Volume<C> {
 	type Candle = C;
 
 	fn apply(&self, buffer: &mut ChartBuffer, data: &[C]) {
-		let mut colour = vec![];
+		let mut vols = vec![];
 		let mut max_vol = 0.;
 
 		for i in 0..data.len() {
 			let candle = &data[i];
-			let vol = candle.volume();
+			let b_vol = candle.buy_volume();
+			let total_vol = candle.total_volume();
 
-			if vol > max_vol {
-				max_vol = vol;
+			if total_vol > max_vol {
+				max_vol = total_vol;
 			}
-			colour.push((vol, candle.close() < candle.open()));
+			vols.push((b_vol, total_vol));
 		}
 
 		buffer.create_extension_strip(175, move |buffer| {
@@ -55,13 +56,15 @@ impl<C: Candle> RendererExtension for Volume<C> {
 				let period = buffer.timeframe / data.len() as i64;
 				let period_addition = 4. * period as f64 / 5.;
 
-				for i in 0..colour.len() - 1 {
-					let entry = colour[i];
+				for i in 0..vols.len() - 1 {
+					let (b, t) = vols[i];
 
 					let p1 = buffer.data_to_coords(0., period * i as i64);
-					let p2 = buffer.data_to_coords(entry.0 / max_vol, ((period * (i as i64)) as f64 + period_addition) as i64);
+					let p2 = buffer.data_to_coords(b / max_vol, ((period * (i as i64)) as f64 + period_addition) as i64);
 
-					buffer.rect_point(p1, p2, if entry.1 { self.buy_colour } else { self.sell_colour });
+					buffer.rect_point(p1, p2, self.buy_colour);
+					let p3 = buffer.data_to_coords(t / max_vol, period * i as i64);
+					buffer.rect_point(p2, p3, self.sell_colour);
 				}
 			}
 		});

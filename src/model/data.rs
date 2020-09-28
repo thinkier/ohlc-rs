@@ -20,23 +20,33 @@ impl Hash for OHLC {
 }
 
 impl Candle for OHLC {
+	#[inline]
 	fn open(&self) -> f64 {
 		self.o
 	}
 
+	#[inline]
 	fn high(&self) -> f64 {
 		self.h
 	}
 
+	#[inline]
 	fn low(&self) -> f64 {
 		self.l
 	}
 
+	#[inline]
 	fn close(&self) -> f64 {
 		self.c
 	}
 
-	fn volume(&self) -> f64 {
+	#[inline]
+	fn buy_volume(&self) -> f64 {
+		0.0
+	}
+
+	#[inline]
+	fn total_volume(&self) -> f64 {
 		0.0
 	}
 }
