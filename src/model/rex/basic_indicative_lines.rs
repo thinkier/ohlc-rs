@@ -42,5 +42,5 @@ fn draw(buffer: &mut ChartBuffer, price: f64, rgba: u32) {
 	let p2 = buffer.data_to_coords(price, buffer.timeframe);
 
 	buffer.line(p1, p2, rgba);
-	buffer.text_with_outline((p2.0 + 3, p2.1 - 9), &format!("{:.8}", price), rgba);
+	buffer.text_with_outline((p2.0 + 3, p2.1 - 9), &format!("{:.1}", price), rgba);
 }

@@ -29,7 +29,7 @@ impl<C: Candle> RendererExtension for GridLines<C> {
 				let p2 = buffer.data_to_coords(price, buffer.timeframe);
 				buffer.line(p1, p2, self.colour);
 				if self.label {
-					buffer.text((p2.0 + 4, p2.1 - 8), &format!("{:.8}", price), self.colour);
+					buffer.text((p2.0 + 4, p2.1 - 8), &format!("{:.1}", price), self.colour);
 				}
 
 				price += self.price_interval;
