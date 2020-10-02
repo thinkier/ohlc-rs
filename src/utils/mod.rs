@@ -9,7 +9,7 @@ pub struct SetAggregate {
 	pub h: f64,
 	pub l: f64,
 	pub c: f64,
-	pub bv: f64,
+	pub bv: Option<f64>,
 	pub v: f64,
 }
 
@@ -23,7 +23,7 @@ impl Candle for SetAggregate {
 	#[inline]
 	fn close(&self) -> f64 { self.c }
 	#[inline]
-	fn buy_volume(&self) -> f64 { self.bv }
+	fn buy_volume(&self) -> Option<f64> { self.bv }
 	#[inline]
 	fn total_volume(&self) -> f64 { self.v }
 }

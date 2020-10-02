@@ -8,11 +8,12 @@ pub struct Volume<C> {
 	label_colour: u32,
 	buy_colour: u32,
 	sell_colour: u32,
+	generic_colour: u32,
 }
 
 impl<C> Volume<C> {
-	pub fn new(label_colour: u32, buy_colour: u32, sell_colour: u32) -> Volume<C> {
-		Volume { _c: PhantomData, label_colour, buy_colour, sell_colour }
+	pub fn new(label_colour: u32, buy_colour: u32, sell_colour: u32, generic_colour: u32) -> Volume<C> {
+		Volume { _c: PhantomData, label_colour, buy_colour, sell_colour, generic_colour }
 	}
 }
 
@@ -59,12 +60,20 @@ impl<C: Candle> RendererExtension for Volume<C> {
 				for i in 0..vols.len() {
 					let (b, t) = vols[i];
 
-					let p1 = buffer.data_to_coords(0., period * i as i64);
-					let p2 = buffer.data_to_coords(b / max_vol, ((period * (i as i64)) as f64 + period_addition) as i64);
+					let left_most = period * i as i64;
+					let right_most = ((period * (i as i64)) as f64 + period_addition) as i64;
 
-					buffer.rect_point(p1, p2, self.buy_colour);
-					let p3 = buffer.data_to_coords(t / max_vol, period * i as i64);
-					buffer.rect_point(p2, p3, self.sell_colour);
+					let bottom_left = buffer.data_to_coords(0., left_most);
+					if let Some(b) = b {
+						let mid_right = buffer.data_to_coords(b / max_vol, right_most);
+
+						buffer.rect_point(bottom_left, mid_right, self.buy_colour);
+						let top_left = buffer.data_to_coords(t / max_vol, left_most);
+						buffer.rect_point(mid_right, top_left, self.sell_colour);
+					} else {
+						let top_right = buffer.data_to_coords(t / max_vol, right_most);
+						buffer.rect_point(bottom_left, top_right, self.generic_colour);
+					}
 				}
 			}
 		});

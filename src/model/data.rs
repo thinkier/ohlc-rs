@@ -41,8 +41,8 @@ impl Candle for OHLC {
 	}
 
 	#[inline]
-	fn buy_volume(&self) -> f64 {
-		0.0
+	fn buy_volume(&self) -> Option<f64> {
+		None
 	}
 
 	#[inline]
