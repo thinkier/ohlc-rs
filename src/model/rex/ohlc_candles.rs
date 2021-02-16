@@ -1,4 +1,4 @@
-use serde::export::PhantomData;
+use std::marker::PhantomData;
 
 use model::*;
 
